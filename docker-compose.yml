@@ -1,0 +1,16 @@
+# [SP1-INF-01 & SP3-INF-02] Phụ trách: Phạm Việt Tiến
+# Khởi tạo Mosquitto MQTT Broker (1883, 8883, 9001) và PostgreSQL/SQLite Database
+version: '3.8'
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: fallguard_mosquitto
+    ports:
+      - "1883:1883"
+      - "8883:8883"
+      - "9001:9001"
+    volumes:
+      - ./broker/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - ./broker/acl.conf:/mosquitto/config/acl.conf
+      - ./certs:/mosquitto/certs
+    restart: unless-stopped
