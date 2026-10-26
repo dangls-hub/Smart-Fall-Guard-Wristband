@@ -30,12 +30,14 @@
 
 ### 🛠️ 1. Trần Đình Nam – Embedded & Firmware Lead
 * **Task ID: SP1-HW-01**
+  * **Trạng thái:** Hoàn thành thiết kế Rev B và file bàn giao; kiểm tra điện áp/dòng/cách ly trên phần cứng chờ khi có linh kiện.
   * **Nhiệm vụ:** Thiết kế Sơ đồ nguyên lý mạch điện phần cứng (Hardware Schematic).
   * **Các bước thực hiện:**
     1. Lựa chọn sơ đồ chân ESP32 NodeMCU 30-pin: GPIO 21 (SDA), GPIO 22 (SCL), GPIO 19 (Buzzer), GPIO 18 (Nút bấm kéo trở Pull-up), GPIO 23 (LED ngoài qua điện trở).
     2. Chạy USB trước; thiết kế pin Li-Po 1S có bảo vệ + sạc có power path + buck-boost 3,3 V. Chọn dòng sạc theo viên pin, thêm driver buzzer và kiểm tra cách ly nguồn khi nạp USB.
     3. Vẽ mạch trên Fritzing hoặc EasyEDA, xuất file sơ đồ mạch dạng PDF và PNG.
   * **File bàn giao:** `docs/hardware_schematic.pdf`, `docs/hardware_schematic.png`.
+  * **File nguồn:** `docs/hardware/SmartFallGuard_RevB.json` (EasyEDA Standard, 2 sheet).
   * **Thời gian:** 01/11/2026 – 03/11/2026 (12 giờ làm việc).
 
 * **Task ID: SP1-HW-02**
