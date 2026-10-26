@@ -4,6 +4,8 @@
 * **Thời gian thực hiện:** Tuần 3 (Từ ngày 15/11/2026 đến 21/11/2026)
 * **Trạng thái:** Kế hoạch thực hiện
 
+> Cập nhật thiết kế 26/10/2026: đây là kế hoạch, chưa có kết quả nghiệm thu. Tham chiếu `docs/ARCHITECTURE_REVIEW.md`, `docs/HARDWARE_BOM.md` và `docs/LATENCY_TEST_PLAN.md`. Chỉ đánh dấu hoàn thành khi có bằng chứng.
+
 ---
 
 ## 1. MỤC TIÊU CỐT LÕI CỦA SPIRAL 3
@@ -18,8 +20,8 @@
 ## 2. PHÂN TÍCH RỦI RO & PHƯƠNG ÁN GIẢM THIỂU (RISK MANAGEMENT)
 | Rủi ro kỹ thuật phát hiện | Mức độ | Phương án xử lý trong Spiral 3 |
 |---|:---:|---|
-| Bộ nhớ Flash SPIFFS bị đầy hoặc hao mòn nếu ghi liên tục dữ liệu telemetry. | Cao | Chỉ lưu các gói tin quan trọng vào SPIFFS khi mất mạng: Gói tin Cảnh báo té ngã (`/alert`) và trạng thái pin; không lưu telemetry định kỳ vào Flash. |
-| Người dùng bấm nút hủy từ Web Dashboard nhưng vòng tay không nhận được do độ trễ mạng. | Trung bình | Sử dụng cơ chế MQTT QoS 1 cho topic lệnh `commands` đảm bảo gói tin được gửi đến vòng tay ít nhất 1 lần (At least once). |
+| Flash đầy hoặc hao mòn. | Cao | Chỉ persist sự kiện quan trọng trước lần gửi đầu; không lưu telemetry định kỳ; queue có giới hạn và chính sách khi đầy. |
+| Lệnh đến chậm hoặc trùng. | Trung bình | QoS 1 + command_id/command_ack và thời hạn; xác nhận trạng thái đã áp dụng thay vì coi publish là đã tắt còi. |
 | API gửi Telegram Bot hoặc SMS bị chặn rate limit hoặc mất kết nối ngoài internet. | Thấp | Bọc cơ chế Try-Catch và hàng đợi (Queue), log lỗi vào database và ưu tiên phát WebSocket trong mạng nội bộ trước. |
 
 ---
@@ -30,9 +32,9 @@
 * **Task ID: SP3-HW-01**
   * **Nhiệm vụ:** Lập trình Bộ đệm ngoại tuyến bằng bộ nhớ Flash SPIFFS (Offline Data Buffer).
   * **Các bước thực hiện:**
-    1. Khởi tạo phân vùng `SPIFFS.begin(true)` trên ESP32.
-    2. Viết hàm `saveEventToOfflineBuffer(jsonPayload)`: Khi kiểm tra `WiFi.status() != WL_CONNECTED` hoặc `!mqttClient.connected()`, ghi nối gói tin vào file `/offline_events.json`.
-    3. Định kỳ kiểm tra kết nối mạng trong hàm `loop()`. Khi mạng online trở lại, đọc tuần tự từng dòng trong file, gửi lên topic `fallguard/v1/devices/{id}/sync` và xóa file đệm sau khi gửi thành công.
+    1. Mount SPIFFS mà không tự format khi mount lỗi; báo lỗi và có quy trình khôi phục để tránh tự xóa hàng đợi.
+    2. Tạo event_id và ghi sự kiện vào hàng đợi bền vững trước lần gửi đầu tiên, kể cả khi online; giới hạn queue và ghi atomic.
+    3. Reconnect không chặn vòng cảm biến; gửi từng sự kiện qua sync với cùng event_id, chỉ dọn sự kiện sau event_ack=STORED từ backend sau commit; mất ACK thì retry.
   * **File bàn giao:** `firmware/spiffs_buffer.h`, `firmware/spiffs_buffer.cpp`.
   * **Thời gian:** 15/11/2026 – 17/11/2026 (12 giờ làm việc).
 
@@ -53,16 +55,16 @@
   * **Nhiệm vụ:** Cấu hình MQTT Last Will and Testament (LWT) & Tối ưu hóa Topic Downlink.
   * **Các bước thực hiện:**
     1. Thiết lập gói tin LWT khi ESP32 kết nối Broker: Payload `{"status": "OFFLINE", "reason": "UNEXPECTED_DISCONNECT"}` với `Retain = true` tại topic `/status`.
-    2. Khi Broker phát hiện ESP32 mất tín hiệu KeepAlive đột ngột (sau 15s), Broker tự động publish gói tin LWT cho Server.
-    3. Kiểm tra đồng bộ cơ sở dữ liệu khi nhận gói tin từ topic `/sync`, đảm bảo các sự kiện ngoại tuyến được đánh dấu cờ `is_synced = true` và sắp xếp đúng mốc thời gian `created_at`.
+    2. Khi Broker phát hiện ESP32 mất tín hiệu KeepAlive đột ngột (phụ thuộc keepalive, phải đo riêng với heartbeat), Broker tự động publish gói tin LWT cho Server.
+    3. Kiểm tra đồng bộ cơ sở dữ liệu khi nhận gói tin từ topic `/sync`, đảm bảo các sự kiện ngoại tuyến được đánh dấu cờ `is_synced = true` và phân biệt thời điểm xảy ra với thời điểm server nhận.
   * **File bàn giao:** `broker/mosquitto.conf`, `database/schema.sql` (Cập nhật cột `is_synced`).
   * **Thời gian:** 15/11/2026 – 17/11/2026 (10 giờ làm việc).
 
 * **Task ID: SP3-INF-02**
   * **Nhiệm vụ:** Quản lý cấu hình triển khai hệ thống tập trung (.env và Docker).
   * **Các bước thực hiện:**
-    1. Chuẩn hóa toàn bộ biến môi trường của hệ thống vào file `.env.example`: `MQTT_HOST`, `MQTT_PORT`, `DB_URL`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`.
-    2. Kiểm tra container hóa toàn bộ hệ thống bằng lệnh `docker compose up -d` trên môi trường sạch để chuẩn bị bàn giao cho môn học.
+    1. Chuẩn hóa toàn bộ biến môi trường của hệ thống vào file `.env.example`: `MQTT_HOST`, `MQTT_PORT`, `DB_HOST`, `DB_PORT`, `POSTGRES_*`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`.
+    2. Kiểm tra Compose chạy broker và PostgreSQL trên môi trường sạch; backend/frontend hiện chạy bằng Node riêng theo README.
   * **File bàn giao:** `docker-compose.yml`, `.env.example`.
   * **Thời gian:** 18/11/2026 – 20/11/2026 (8 giờ làm việc).
 
@@ -116,11 +118,11 @@
 ---
 
 ## 4. TIÊU CHÍ NGHIỆM THU SPIRAL 3 (DEFINITION OF DONE - DoD)
-* [x] Rút dây mạng Wi-Fi: ESP32 vẫn phát hiện ngã, lưu vào Flash SPIFFS; khi cắm lại Wi-Fi, tự động gửi bù gói tin lên Server.
-* [x] Rút nguồn đột ngột ESP32: Dashboard và Server phát hiện chuyển trạng thái `OFFLINE` trong vòng 15s nhờ MQTT Last Will.
-* [x] Bấm nút "Tìm vòng tay" trên Web: Vòng tay nhận được lệnh và còi Buzzer kêu bíp bíp tức thì.
-* [x] Khi xảy ra sự kiện ngã: Tin nhắn cảnh báo kèm thông số gửi về Telegram Bot người thân trong vòng $\le 3s$.
-* [x] Bộ mô phỏng Web Virtual Simulator hoạt động độc lập, kích hoạt được cả 5 kịch bản kiểm thử trực quan.
+* [ ] Rút dây mạng Wi-Fi: ESP32 vẫn phát hiện ngã, lưu vào Flash SPIFFS; khi cắm lại Wi-Fi, tự động gửi bù gói tin lên Server.
+* [ ] Rút nguồn đột ngột ESP32: Dashboard và Server phát hiện chuyển trạng thái `OFFLINE` với mục tiêu 15s; đo riêng LWT và timeout heartbeat.
+* [ ] Bấm nút "Tìm vòng tay" trên Web: Vòng tay nhận được lệnh và còi Buzzer kêu bíp bíp tức thì.
+* [ ] Sau CONFIRMED_FALL khi online: Tin nhắn cảnh báo kèm thông số gửi về Telegram Bot người thân trong vòng $\le 3s$.
+* [ ] Bộ mô phỏng Web Virtual Simulator hoạt động độc lập, kích hoạt được cả 5 kịch bản kiểm thử trực quan.
 
 ---
 
@@ -128,3 +130,7 @@
 * **Biên bản họp Spiral Review:** Thứ 7 ngày 21/11/2026.
 * **Nội dung:** Đánh giá tính sẵn sàng của toàn hệ thống; rà soát các trường hợp ngoại lệ (mất mạng, hết pin, ngã đa chiều).
 * **Đầu ra văn bản:** **Bản thảo Chương 3, 4, 5 của Báo cáo Bài tập lớn (BTL)** do cả 4 thành viên cùng phối hợp hoàn thành.
+
+## Yêu cầu bổ sung cho offline
+
+Ghi sự kiện bền vững trước lần gửi đầu; retry cùng event_id, chỉ xóa khi backend ACK sau commit. Thêm UNIQUE(device_id,event_id) bằng migration khi triển khai ingest. Thử mất ACK, cắt nguồn, queue đầy và restart. Đồng bộ lịch sử không cung cấp cảnh báo từ xa khi Wi-Fi đang mất. Không dùng thời gian server nhận làm thời gian ngã. Simulator phải gắn nguồn riêng.

@@ -16,6 +16,9 @@ build/
 
 # Private keys
 certs/*.key
+certs/*.csr
+certs/*.srl
+certs/*.ext
 broker/passwd
 
 # OS & Editor files

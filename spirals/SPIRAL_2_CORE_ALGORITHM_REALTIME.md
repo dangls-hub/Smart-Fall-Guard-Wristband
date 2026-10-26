@@ -4,13 +4,15 @@
 * **Thời gian thực hiện:** Tuần 2 (Từ ngày 08/11/2026 đến 14/11/2026)
 * **Trạng thái:** Kế hoạch thực hiện
 
+> Cập nhật thiết kế 26/10/2026: đây là kế hoạch, chưa có kết quả nghiệm thu. Tham chiếu `docs/ARCHITECTURE_REVIEW.md`, `docs/HARDWARE_BOM.md` và `docs/LATENCY_TEST_PLAN.md`. Chỉ đánh dấu hoàn thành khi có bằng chứng.
+
 ---
 
 ## 1. MỤC TIÊU CỐT LÕI CỦA SPIRAL 2
 1. Viết mã nguồn ESP32 thu thập gia tốc 3 trục ($a_x, a_y, a_z$) và con quay hồi chuyển ($\omega_x, \omega_y, \omega_z$) ở tần số lấy mẫu 50Hz.
-2. Cài đặt thuật toán nhận diện té ngã 4 giai đoạn dựa trên giá trị gia tốc tổng hợp $SVM$ và góc nghiêng cơ thể.
+2. Cài đặt thuật toán nhận diện té ngã 4 giai đoạn dựa trên giá trị gia tốc tổng hợp $SVM$ và góc nghiêng cảm biến tại cổ tay.
 3. Cài đặt còi Buzzer cảnh báo tại chỗ và nút bấm vật lý hủy báo động trong 15 giây.
-4. Triển khai luồng truyền dữ liệu thời gian thực: ESP32 $\rightarrow$ MQTT Broker $\rightarrow$ Backend Server $\rightarrow$ WebSocket Gateway (Socket.io) $\rightarrow$ Web Dashboard với độ trễ $\le 2s$.
+4. Triển khai luồng truyền dữ liệu thời gian thực: ESP32 $\rightarrow$ MQTT Broker $\rightarrow$ Backend Server $\rightarrow$ WebSocket Gateway (Socket.io) $\rightarrow$ Web Dashboard với mục tiêu độ trễ từ CONFIRMED_FALL tới dashboard $\le 2s$, đo riêng tổng thời gian từ va chạm.
 5. Hoàn thiện đồ thị Telemetry hiển thị gia tốc 3 trục trực tiếp trên giao diện Dashboard.
 
 ---
@@ -18,9 +20,9 @@
 ## 2. PHÂN TÍCH RỦI RO & PHƯƠNG ÁN GIẢM THIỂU (RISK MANAGEMENT)
 | Rủi ro kỹ thuật phát hiện | Mức độ | Phương án xử lý trong Spiral 2 |
 |---|:---:|---|
-| Tỷ lệ báo động giả cao khi vung tay mạnh hoặc ngồi nhanh xuống ghế. | Cao | Bắt buộc kiểm tra đồng thời cả 4 pha: Rơi tự do ($SVM < 0.5g$), Va chạm ($SVM > 2.8g$), Đổi hướng góc nghiêng ($> 45^\circ$) và Nằm yên bất động ($3s$). |
+| Báo giả do vung tay và bỏ sót ngã chậm/ngã khuỵu. | Cao | Dùng FSM 4 pha làm bản nền, thu dữ liệu cổ tay, kiểm thử ngã không có rơi tự do và tách tập hiệu chỉnh khỏi đánh giá. |
 | Tần số lấy mẫu 50Hz gây tràn bộ nhớ đệm hoặc nghẽn mạng Wi-Fi nếu gửi liên tục. | Cao | Chỉ tính toán thuật toán nội bộ ở tần số 50Hz trên ESP32; chỉ đẩy Telemetry định kỳ 2s/lần hoặc gửi ngay lập tức khi phát hiện va chạm. |
-| Độ trễ WebSocket bị chậm do đường truyền hoặc xử lý CSDL đồng bộ. | Trung bình | Xử lý bất đồng bộ (Asynchronous): Khi nhận gói tin cảnh báo, phát ngay sự kiện Socket.io cho Client trước, sau đó mới ghi vào CSDL. |
+| Độ trễ do CSDL và mạng. | Trung bình | Lưu transaction và chống trùng trước khi ACK/phát Socket.io; đo độ trễ sau xác nhận, không đẩy cảnh báo chưa được lưu bền vững. |
 
 ---
 
@@ -31,19 +33,19 @@
   * **Nhiệm vụ:** Viết Driver đọc MPU6050 tần số 50Hz và tính toán thông số vector chuyển động.
   * **Các bước thực hiện:**
     1. Lập trình đọc thanh ghi cảm biến MPU6050 qua I2C mỗi 20ms ($50Hz$) sử dụng bộ đếm `millis()`.
-    2. Chuẩn hóa giá trị gia tốc về đơn vị $g$: $a_x = \frac{\text{RawAcX}}{4096.0}$, $a_y = \frac{\text{RawAcY}}{4096.0}$, $a_z = \frac{\text{RawAcZ}}{4096.0}$.
+    2. Cấu hình dải ±8 g rồi chuẩn hóa giá trị gia tốc về đơn vị $g$: $a_x = \frac{\text{RawAcX}}{4096.0}$, $a_y = \frac{\text{RawAcY}}{4096.0}$, $a_z = \frac{\text{RawAcZ}}{4096.0}$.
     3. Tính gia tốc tổng hợp: $SVM = \sqrt{a_x^2 + a_y^2 + a_z^2}$.
-    4. Tính góc nghiêng cơ thể dựa trên bộ lọc bù (Complementary Filter): $\text{Pitch} = \arctan\left(\frac{a_x}{\sqrt{a_y^2 + a_z^2}}\right) \times \frac{180}{\pi}$.
+    4. Tính góc cảm biến bằng atan2 khi gần tĩnh; bộ lọc bù phải kết hợp gyro và dt sau hiệu chuẩn. Công thức chỉ từ gia tốc không phải bộ lọc bù và không đại diện trực tiếp cho tư thế toàn thân.
   * **File bàn giao:** `firmware/mpu6050_driver.h`, `firmware/mpu6050_driver.cpp`.
   * **Thời gian:** 08/11/2026 – 10/11/2026 (14 giờ làm việc).
 
 * **Task ID: SP2-HW-02**
   * **Nhiệm vụ:** Cài đặt thuật toán nhận diện té ngã 4 giai đoạn & Cảnh báo tại chỗ 15s.
   * **Các bước thực hiện:**
-    1. Triển khai máy trạng thái (FSM - Finite State Machine): `IDLE` $\rightarrow$ `FREE_FALL` $\rightarrow$ `IMPACT` $\rightarrow$ `INACTIVITY` $\rightarrow$ `LOCAL_ALARM` $\rightarrow$ `CONFIRMED_FALL`.
-    2. Cài đặt ngưỡng: Pha 1 ($SVM < 0.5g$), Pha 2 ($SVM > 2.8g$ trong 500ms), Pha 3 ($\Delta \text{Angle} > 45^\circ$), Pha 4 (Biến thiên $SVM < 0.2g$ trong $3s$).
+    1. Triển khai máy trạng thái (FSM - Finite State Machine): `IDLE` $\rightarrow$ `FREE_FALL` $\rightarrow$ `IMPACT` $\rightarrow$ `POSTURE_CHANGE` $\rightarrow$ `INACTIVITY` $\rightarrow$ `LOCAL_ALARM` $\rightarrow$ `CONFIRMED_FALL`.
+    2. Cài đặt ngưỡng: Pha 1 ($SVM < 0.5g$), Pha 2 ($SVM > 2.8g$ trong 500ms), Pha 3 ($\Delta \text{Angle} > 45^\circ$), Pha 4 (đánh giá biến thiên theo cửa sổ accel và gyro trong 3s; ngưỡng cần đo/hiệu chỉnh).
     3. Kích hoạt còi hú Buzzer (tần số 2kHz ngắt quãng) và nhấp nháy LED đỏ.
-    4. Lắng nghe nút bấm GPIO 18 (sử dụng ngắt `attachInterrupt` chống dội phím). Nếu người dùng ấn nút trong 15s $\rightarrow$ Hủy còi và trở về `IDLE`.
+    4. Lắng nghe nút bấm GPIO 18 (debounce bằng thời gian; nếu dùng ISR chỉ đặt cờ, không làm I/O/MQTT trong ISR). Nếu người dùng ấn nút trong 15s $\rightarrow$ Hủy còi và trở về `IDLE`.
     5. Hết 15s không bấm $\rightarrow$ Chuyển sang `CONFIRMED_FALL` và gọi hàm phát gói tin MQTT.
   * **File bàn giao:** `firmware/fall_detection.h`, `firmware/fall_detection.cpp`, `firmware/SmartFallGuard.ino`.
   * **Thời gian:** 11/11/2026 – 14/11/2026 (16 giờ làm việc).
@@ -55,15 +57,15 @@
   * **Nhiệm vụ:** Cấu hình bảo mật MQTT Broker qua TLS/SSL (Port 8883) & Quản lý User/Password.
   * **Các bước thực hiện:**
     1. Tạo khóa và chứng chỉ bảo mật tự ký (Self-signed CA, Server Certificate, Server Key) bằng OpenSSL.
-    2. Cấu hình file `mosquitto.conf` kích hoạt port 8883 với đường dẫn chứng chỉ `ca.crt`, `server.crt`, `server.key`.
-    3. Thiết lập quyền ACL: tài khoản `esp32_device` chỉ được quyền PUBLISH lên `fallguard/v1/devices/{device_id}/#` và SUBSCRIBE vào `commands`.
+    2. Dùng broker/mosquitto.tls.conf và docker-compose.tls.yml, tạo chứng chỉ có SAN khớp host/IP; xác minh CA/hostname, không tắt kiểm tra TLS.
+    3. Mỗi thiết bị dùng username bằng device_id; chỉ publish telemetry/alert/status/sync/command_ack và đọc commands/event_ack trong nhánh của mình.
   * **File bàn giao:** `certs/ca.crt`, `certs/server.crt`, `broker/mosquitto.conf`, `broker/acl.conf`.
   * **Thời gian:** 08/11/2026 – 10/11/2026 (12 giờ làm việc).
 
 * **Task ID: SP2-INF-02**
   * **Nhiệm vụ:** Xây dựng script kiểm tra Heartbeat định kỳ của thiết bị.
   * **Các bước thực hiện:**
-    1. Viết script `services/heartbeat_daemon.js` chạy nền bằng Node.js.
+    1. Triển khai heartbeat timer trong backend; chưa chạy daemon riêng. File services/heartbeat_daemon.js hiện chỉ là placeholder.
     2. Cứ mỗi 5s truy vấn bảng `devices` kiểm tra trường `last_seen`.
     3. Nếu thời gian hiện tại trừ `last_seen` vượt quá 15 giây $\rightarrow$ Ghi log thiết bị mất kết nối và chuyển `status = 'OFFLINE'`.
   * **File bàn giao:** `services/heartbeat_daemon.js`.
@@ -77,7 +79,7 @@
   * **Các bước thực hiện:**
     1. Cài đặt thư viện `socket.io` trên Backend Server.
     2. Khởi tạo `socketService.js` lắng nghe các kết nối từ Web Client và quản lý phòng (Rooms) theo `device_id`.
-    3. Khi MQTT Subscriber nhận được topic `fallguard/v1/devices/{id}/alert` $\rightarrow$ Ngay lập tức broadcast sự kiện `EMERGENCY_FALL_DETECTED` qua Socket.io kèm payload chi tiết (Lực va chạm, thời gian).
+    3. Khi nhận alert: kiểm tra payload, lưu transaction và chống trùng theo event_id; ACK sau commit, phát EMERGENCY_FALL_DETECTED tới phòng được phân quyền nếu là sự kiện mới.
     4. Đo thời gian xử lý đảm bảo từ lúc nhận gói tin MQTT đến khi phát socket mất $< 100ms$.
   * **File bàn giao:** `backend/services/socketService.js`, `backend/server.js`.
   * **Thời gian:** 08/11/2026 – 11/11/2026 (14 giờ làm việc).
@@ -118,12 +120,12 @@
 ---
 
 ## 4. TIÊU CHÍ NGHIỆM THU SPIRAL 2 (DEFINITION OF DONE - DoD)
-* [x] ESP32 đọc được dữ liệu MPU6050 tần số 50Hz và tính chính xác công thức $SVM$.
-* [x] Thuật toán phát hiện ngã kích hoạt được còi hú tại chỗ; ấn nút vật lý hủy còi thành công.
-* [x] Khi hết 15s không bấm hủy, gói tin cảnh báo được gửi qua MQTT lên Backend.
-* [x] Backend phát WebSocket tới Web Dashboard; Modal đỏ bật lên với âm thanh cảnh báo.
-* [x] Tổng độ trễ từ lúc hết 15s đếm ngược đến khi Modal bật trên Web đạt $\le 2.0$ giây.
-* [x] Biểu đồ gia tốc trên Web hiển thị các giá trị thay đổi khi lắc cảm biến.
+* [ ] ESP32 đọc được dữ liệu MPU6050 tần số 50Hz và tính chính xác công thức $SVM$.
+* [ ] Thuật toán phát hiện ngã kích hoạt được còi hú tại chỗ; ấn nút vật lý hủy còi thành công.
+* [ ] Khi hết 15s không bấm hủy, gói tin cảnh báo được gửi qua MQTT lên Backend.
+* [ ] Backend phát WebSocket tới Web Dashboard; Modal đỏ bật lên với âm thanh cảnh báo.
+* [ ] Tổng độ trễ từ lúc hết 15s đếm ngược đến khi Modal bật trên Web đạt $\le 2.0$ giây.
+* [ ] Biểu đồ gia tốc trên Web hiển thị các giá trị thay đổi khi lắc cảm biến.
 
 ---
 

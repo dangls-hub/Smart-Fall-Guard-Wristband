@@ -4,6 +4,8 @@
 * **Thời gian thực hiện:** Tuần 1 (Từ ngày 01/11/2026 đến 07/11/2026)
 * **Trạng thái:** Sẵn sàng triển khai
 
+> Cập nhật thiết kế 26/10/2026: đây là kế hoạch, chưa có kết quả nghiệm thu. Tham chiếu `docs/ARCHITECTURE_REVIEW.md`, `docs/HARDWARE_BOM.md` và `docs/LATENCY_TEST_PLAN.md`. Chỉ đánh dấu hoàn thành khi có bằng chứng.
+
 ---
 
 ## 1. MỤC TIÊU CỐT LÕI CỦA SPIRAL 1
@@ -19,7 +21,7 @@
 | Rủi ro kỹ thuật phát hiện | Mức độ | Phương án xử lý trong Spiral 1 |
 |---|:---:|---|
 | MPU6050 bị nhiễu dây cáp I2C hoặc sai lệch địa chỉ I2C ($0x68$ vs $0x69$). | Trung bình | Kiểm tra chân AD0 (nối GND để cố định $0x68$). Viết script I2C Scanner trên ESP32 để phát hiện đúng địa chỉ trước khi code driver. |
-| Xung đột phiên bản Node.js / thư viện MQTT khi chạy trên các máy khác nhau. | Thấp | Cung cấp file `docker-compose.yml` và chuẩn hóa phiên bản Node.js LTS (v18 hoặc v20), file `.env.example`. |
+| Xung đột phiên bản Node.js / thư viện MQTT khi chạy trên các máy khác nhau. | Thấp | Cung cấp file `docker-compose.yml` và chuẩn hóa phiên bản Node.js 22, file `.env.example`. |
 | Chưa có thiết bị phần cứng thật để nhóm làm Frontend và Backend kiểm thử. | Cao | Tiến và Đăng thống nhất tạo payload JSON mẫu và mock dữ liệu ngay từ đầu tuần 1. |
 
 ---
@@ -30,8 +32,8 @@
 * **Task ID: SP1-HW-01**
   * **Nhiệm vụ:** Thiết kế Sơ đồ nguyên lý mạch điện phần cứng (Hardware Schematic).
   * **Các bước thực hiện:**
-    1. Lựa chọn sơ đồ chân ESP32 NodeMCU 30-pin: GPIO 21 (SDA), GPIO 22 (SCL), GPIO 19 (Buzzer), GPIO 18 (Nút bấm kéo trở Pull-up), GPIO 2 (LED trạng thái).
-    2. Thiết kế mạch cấp nguồn sử dụng module sạc pin TP4056 kết hợp pin Li-Po 3.7V và IC hạ áp AMS1117-3.3V.
+    1. Lựa chọn sơ đồ chân ESP32 NodeMCU 30-pin: GPIO 21 (SDA), GPIO 22 (SCL), GPIO 19 (Buzzer), GPIO 18 (Nút bấm kéo trở Pull-up), GPIO 23 (LED ngoài qua điện trở).
+    2. Chạy USB trước; thiết kế pin Li-Po 1S có bảo vệ + sạc có power path + buck-boost 3,3 V. Chọn dòng sạc theo viên pin, thêm driver buzzer và kiểm tra cách ly nguồn khi nạp USB.
     3. Vẽ mạch trên Fritzing hoặc EasyEDA, xuất file sơ đồ mạch dạng PDF và PNG.
   * **File bàn giao:** `docs/hardware_schematic.pdf`, `docs/hardware_schematic.png`.
   * **Thời gian:** 01/11/2026 – 03/11/2026 (12 giờ làm việc).
@@ -51,9 +53,9 @@
 * **Task ID: SP1-INF-01**
   * **Nhiệm vụ:** Khởi tạo MQTT Broker Mosquitto và file cấu hình Docker Compose.
   * **Các bước thực hiện:**
-    1. Viết file `docker-compose.yml` chứa service Mosquitto Broker và PostgreSQL / SQLite.
-    2. Cấu hình file `broker/mosquitto.conf` mở port chuẩn 1883 (TCP) và port 9001 (WebSockets).
-    3. Thiết lập bảo mật cơ bản: tạo file `passwd` bằng `mosquitto_passwd` cấp tài khoản `fallguard_esp32` và `fallguard_backend`.
+    1. Viết file `docker-compose.yml` chứa service Mosquitto Broker và PostgreSQL.
+    2. Cấu hình file `broker/mosquitto.conf` dùng 1883 có xác thực chỉ trên loopback; kết nối LAN dùng TLS 8883 qua override, không cần MQTT WebSockets.
+    3. Thiết lập bảo mật cơ bản: tạo file `passwd` bằng `mosquitto_passwd` cấp tài khoản riêng theo `device_id` và `fallguard_backend`, áp ACL theo username.
   * **File bàn giao:** `docker-compose.yml`, `broker/mosquitto.conf`, `broker/acl.conf`.
   * **Thời gian:** 01/11/2026 – 03/11/2026 (10 giờ làm việc).
 
@@ -75,7 +77,7 @@
 * **Task ID: SP1-BE-01**
   * **Nhiệm vụ:** Khởi tạo Backend Server Express và kết nối MQTT Broker.
   * **Các bước thực hiện:**
-    1. Khởi tạo dự án Node.js (`npm init -y`), cài đặt dependencies: `express`, `mqtt`, `dotenv`, `cors`, `pg`/`sqlite3`.
+    1. Khởi tạo dự án Node.js (`npm init -y`), cài đặt dependencies: `express`, `mqtt`, `dotenv`, `cors`, `pg`.
     2. Viết file `backend/server.js` cấu hình Express lắng nghe trên cổng 5000.
     3. Viết module `backend/services/mqttService.js` tự động kết nối Broker, subscribe topic `fallguard/v1/devices/+/+` và log dữ liệu nhận được ra console.
   * **File bàn giao:** `backend/package.json`, `backend/server.js`, `backend/services/mqttService.js`.
@@ -114,12 +116,12 @@
 ---
 
 ## 4. TIÊU CHÍ NGHIỆM THU SPIRAL 1 (DEFINITION OF DONE - DoD)
-* [x] Sơ đồ mạch điện phần cứng được duyệt, không bị tranh chấp chân GPIO.
-* [x] MPU6050 được phát hiện đúng địa chỉ `0x68` qua bus I2C.
-* [x] MQTT Broker khởi chạy thành công qua Docker, nhận và gửi được gói tin ping test.
-* [x] CSDL đã tạo đủ các bảng `devices`, `telemetry_logs`, `fall_events`.
-* [x] Server Express chạy ổn định, kết nối được với Broker và CSDL.
-* [x] Giao diện Web hiển thị được khung Dashboard hoàn chỉnh trên trình duyệt.
+* [ ] Sơ đồ mạch điện phần cứng được duyệt, không bị tranh chấp chân GPIO.
+* [ ] MPU6050 được phát hiện đúng địa chỉ `0x68` qua bus I2C.
+* [ ] MQTT Broker khởi chạy thành công qua Docker, nhận và gửi được gói tin ping test.
+* [ ] CSDL đã tạo đủ các bảng `devices`, `telemetry_logs`, `fall_events`.
+* [ ] Server Express chạy ổn định, kết nối được với Broker và CSDL.
+* [ ] Giao diện Web hiển thị được khung Dashboard hoàn chỉnh trên trình duyệt.
 
 ---
 

@@ -4,12 +4,14 @@
 * **Thời gian thực hiện:** Tuần 4 (Từ ngày 22/11/2026 đến 30/11/2026)
 * **Trạng thái:** Kế hoạch thực hiện
 
+> Cập nhật thiết kế 26/10/2026: đây là kế hoạch, chưa có kết quả nghiệm thu. Tham chiếu `docs/ARCHITECTURE_REVIEW.md`, `docs/HARDWARE_BOM.md` và `docs/LATENCY_TEST_PLAN.md`. Chỉ đánh dấu hoàn thành khi có bằng chứng.
+
 ---
 
 ## 1. MỤC TIÊU CỐT LÕI CỦA SPIRAL 4
-1. Thực hiện kiểm thử thực tế toàn diện **50 kịch bản** (25 kịch bản té ngã thật trên nệm bảo hộ + 25 kịch bản hoạt động sinh hoạt mạnh thường ngày để kiểm tra độ tin cậy và tỷ lệ báo giả).
-2. Đo đạc thực nghiệm và thu thập số liệu chứng minh đạt đầy đủ 6 chỉ số kỹ thuật (KPIs):
-   * Độ trễ cảnh báo (Latency) $\le 2.0$ giây.
+1. Thực hiện kiểm thử thực tế toàn diện **50 kịch bản** (25 kịch bản mô phỏng ngã có kiểm soát trên nệm bảo hộ + 25 kịch bản hoạt động sinh hoạt mạnh thường ngày để kiểm tra độ tin cậy và tỷ lệ báo giả).
+2. Đo đạc thực nghiệm và đánh giá theo 6 chỉ số kỹ thuật (KPIs):
+   * Độ trễ CONFIRMED_FALL → dashboard $\le 2.0$ giây khi online; ghi riêng tổng thời gian từ va chạm gồm bất động 3s và hủy 15s.
    * Độ chính xác phát hiện ngã $\ge 90\%$.
    * Tỷ lệ báo giả $< 10\%$.
    * Tính bền bỉ ngoại tuyến đạt $100\%$ không mất gói tin khi mất Wi-Fi.
@@ -21,7 +23,7 @@
 
 ## 2. BẢNG 50 KỊCH BẢN KIỂM THỬ THỰC TẾ (TEST MATRIX)
 
-### Nhóm A: 25 Kịch bản Té ngã Thật (True Positive Test Cases)
+### Nhóm A: 25 Kịch bản Mô phỏng Ngã có Kiểm soát (True Positive Test Cases)
 Thực hiện trên nệm bảo hộ xốp dày 20cm tại phòng thể chất/phòng lab:
 1. Ngã chúi người về phía trước khi đang bước đi bình thường (5 lần).
 2. Trượt chân ngã ngửa ra phía sau khi đang đi trên sàn trơn (5 lần).
@@ -39,7 +41,7 @@ Kiểm tra khả năng phân biệt và chống báo giả của thuật toán:
 4. Vỗ tay thật mạnh nhiều lần liên tiếp (3 lần).
 5. Cúi gập người xuống sàn nhặt đồ rồi đứng phắt dậy (3 lần).
 6. Bấm chuông cửa / gõ cửa phòng mạnh tay (2 lần).
-7. Vòng tay bị rơi tự do từ bàn làm việc cao 80cm xuống thảm có người bấm nút hủy 15s (2 lần).
+7. Vận động cổ tay nhanh rồi giữ yên (2 lần). Thử rơi thiết bị không đeo và nút hủy thành bộ thử riêng.
 
 ---
 
@@ -49,9 +51,9 @@ Kiểm tra khả năng phân biệt và chống báo giả của thuật toán:
 * **Task ID: SP4-HW-01**
   * **Nhiệm vụ:** Thực hiện kiểm thử phần cứng, đo đạc dòng điện và tối ưu thời lượng Pin.
   * **Các bước thực hiện:**
-    1. Mắc đồng hồ đo Ampe kế nối tiếp nguồn Pin Li-Po 3.7V (400mAh) để đo dòng tiêu thụ:
-       * Chế độ Active thu thập $I^2C$ & Wi-Fi gửi tin: $\approx 80 - 110 mA$.
-       * Chế độ Modem Sleep / Light Sleep giữa các chu kỳ gửi Telemetry: $\approx 15 - 20 mA$.
+    1. Mắc đồng hồ đo Ampe kế nối tiếp nguồn pin Li-Po 1S của prototype (chốt dung lượng sau đo dòng) để đo dòng tiêu thụ:
+       * Chế độ lấy mẫu và Wi-Fi: đo dòng trung bình, xung đỉnh và sụt áp tại phía pin; chưa có giá trị thực nghiệm.
+       * Chế độ tiết kiệm điện: đo với firmware thật, xác minh lấy mẫu 50 Hz vẫn đạt; không lấy dòng deep sleep làm dòng trung bình.
     2. Tính toán lý thuyết và chạy thử nghiệm xả pin thực tế liên tục trong 24h để lập biểu đồ phần trăm pin theo thời gian.
     3. Tinh chỉnh ngưỡng va chạm và thời gian lọc trôi gyro nếu phát hiện báo giả trong 25 ca thử nghiệm sinh hoạt.
   * **File bàn giao:** `docs/BATTERY_BENCHMARK_REPORT.md`, `firmware/SmartFallGuard.ino` (Bản Release v1.0).
@@ -91,11 +93,11 @@ Kiểm tra khả năng phân biệt và chống báo giả của thuật toán:
 * **Task ID: SP4-BE-01**
   * **Nhiệm vụ:** Đo đạc độ trễ đầu cuối (End-to-End Latency) & Hoàn thiện tài liệu API.
   * **Các bước thực hiện:**
-    1. Chèn mã ghi log gắn nhãn thời gian tính bằng mili-giây (Timestamp ms) tại 3 điểm:
-       * Điểm A: Lúc gia tốc chạm ngưỡng va chạm trên ESP32.
+    1. Chèn mã ghi log gắn nhãn thời gian tính bằng mili-giây (Timestamp ms) tại các điểm; xem docs/LATENCY_TEST_PLAN.md:
+       * Điểm A0: lúc va chạm; điểm A1: chuyển CONFIRMED_FALL sau thời gian bất động và chờ hủy.
        * Điểm B: Lúc gói tin MQTT đến Backend Server.
        * Điểm C: Lúc Client Web nhận được WebSocket và render ra màn hình.
-    2. Đo trên 30 lần kích hoạt để tính toán: Độ trễ trung bình, độ trễ tối đa (Đảm bảo $\le 2000ms$).
+    2. Đo trên 30 lần kích hoạt để tính toán: A1→C trung bình/p95/tối đa (mục tiêu ≤2000ms); ghi riêng A0→C và sai số đồng bộ đồng hồ. Không trừ uptime ESP32 với timestamp server.
     3. Cập nhật hoàn chỉnh tài liệu Postman Collection và `API_DOCUMENTATION.md`.
   * **File bàn giao:** `docs/LATENCY_TEST_RESULTS.xlsx`, `docs/API_DOCUMENTATION.md`.
   * **Thời gian:** 22/11/2026 – 25/11/2026 (12 giờ làm việc).
@@ -114,7 +116,7 @@ Kiểm tra khả năng phân biệt và chống báo giả của thuật toán:
 * **Task ID: SP4-FE-01**
   * **Nhiệm vụ:** Thu thập và thống kê kết quả 50 ca kiểm thử & Tinh chỉnh giao diện Web cuối cùng.
   * **Các bước thực hiện:**
-    1. Ghi nhận nhật ký 50 kịch bản ngã vào bảng tính Excel: Đánh dấu Đạt/Không đạt cho từng lần thử.
+    1. Ghi nhận nhật ký 50 kịch bản ngã vào bảng tính Excel: Ghi nhãn thực và kết quả thuật toán trước nút hủy, rồi ghi riêng việc hủy/nhận cảnh báo từ xa; tách tập hiệu chỉnh và đánh giá.
     2. Tính toán ma trận nhầm lẫn (Confusion Matrix):
        * Độ nhạy (Sensitivity / Recall) $= \frac{TP}{TP + FN} \times 100\%$.
        * Độ đặc hiệu (Specificity) $= \frac{TN}{TN + FP} \times 100\%$.
@@ -138,12 +140,12 @@ Kiểm tra khả năng phân biệt và chống báo giả của thuật toán:
 
 | Chỉ số kỹ thuật | Ngưỡng cam kết | Kết quả kiểm thử thực nghiệm | Kết luận |
 |---|:---:|:---:|:---:|
-| **Độ trễ cảnh báo (Latency)** | $\le 2.0$ giây | $0.85$ giây – $1.45$ giây | **ĐẠT** |
-| **Độ chính xác nhận diện ngã** | $\ge 90\%$ | $92.0\%$ (23/25 ca ngã nhận biết chính xác) | **ĐẠT** |
-| **Tỷ lệ báo giả (False Alarm)** | $< 10\%$ | $8.0\%$ (2/25 ca báo nhầm khi vỗ tay cực mạnh) | **ĐẠT** |
-| **Tính bền bỉ mạng (Offline)** | $100\%$ không mất tin | $10/10$ gói tin đồng bộ thành công sau khi có lại Wi-Fi | **ĐẠT** |
-| **Thời lượng Pin** | $\ge 24$ giờ | $28.5$ giờ hoạt động liên tục với pin 400mAh | **ĐẠT** |
-| **Cảnh báo mất kết nối (LWT)** | $\le 15$ giây | $11.2$ giây từ khi ngắt nguồn | **ĐẠT** |
+| **Độ trễ sau xác nhận → dashboard** | $\le 2.0$ giây | Chưa đo | Chưa kết luận |
+| **Độ chính xác nhận diện ngã** | $\ge 90\%$ | Chưa đo | Chưa kết luận |
+| **Tỷ lệ báo giả (False Alarm)** | $< 10\%$ | Chưa đo | Chưa kết luận |
+| **Đồng bộ offline trong bộ thử** | 10/10 sự kiện, không trùng, ACK sau commit | Chưa đo | Chưa kết luận |
+| **Thời lượng Pin** | $\ge 24$ giờ | Chưa đo | Chưa kết luận |
+| **Timeout heartbeat; LWT đo riêng** | Mục tiêu heartbeat $\le 15$ giây | Chưa đo | Chưa kết luận |
 
 ---
 

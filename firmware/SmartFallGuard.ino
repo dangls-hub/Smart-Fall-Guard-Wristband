@@ -5,7 +5,7 @@
 #include "spiffs_buffer.h"
 
 void setup() {
-    // TODO: Khởi tạo Serial, GPIO (18, 19, 2), I2C (21, 22), SPIFFS, Wi-Fi và MQTT
+    // TODO: Khởi tạo Serial, GPIO (18, 19, 23), I2C (21, 22), SPIFFS, Wi-Fi và MQTT
 }
 
 void loop() {
