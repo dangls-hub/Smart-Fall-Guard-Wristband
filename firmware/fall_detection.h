@@ -7,6 +7,7 @@ enum FallState {
     IDLE,
     FREE_FALL,
     IMPACT,
+    POSTURE_CHANGE,
     INACTIVITY,
     LOCAL_ALARM,
     CONFIRMED_FALL
