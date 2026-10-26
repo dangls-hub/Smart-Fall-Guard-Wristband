@@ -48,6 +48,8 @@ FSM bản nền:
 
 Xem [danh sách linh kiện, tiêu chí mua và đấu nối](docs/HARDWARE_BOM.md).
 
+Đã có [sơ đồ EasyEDA USB Rev A và file nguồn chỉnh sửa](docs/hardware/README.md) cho bản lắp thử.
+
 | Chức năng | GPIO ESP32 | Ghi chú |
 |---|---|---|
 | MPU6050 SDA / SCL | 21 / 22 | Pull-up I²C lên 3,3 V; kiểm tra module |
