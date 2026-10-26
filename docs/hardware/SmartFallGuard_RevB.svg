@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE svg
+  PUBLIC '-//W3C//DTD SVG 1.0//EN'
+  'http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd'>
+<svg width="1190.5511811023623" height="841.8897637795277" preserveAspectRatio="xMinYMin meet" viewBox="0 0 1190 841" xmlns="http://www.w3.org/2000/svg" version="1.0" fill-rule="evenodd" xmlns:xlink="http://www.w3.org/1999/xlink">
+	<title>...</title>
+	<desc>...</desc>
+	<clipPath id="clip">
+		<rect x="0" y="0" width="1190.5511811023623" height="841.8897637795277"/>
+	</clipPath>
+	<g id="group" transform="scale(1,-1) translate(0,-841)" style="clip-path: url(#clip)">
+		<g transform="">
+			<rect x="0" y="0" width="1190.5511811023623" height="841.8897637795277" style="stroke: none; stroke-linecap: butt; stroke-width: 1; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<rect x="18" y="18" width="1154.5511811023623" height="805.8897637795277" style="stroke: rgb(32%,39%,47%); stroke-linecap: butt; stroke-width: 1.2; fill: none; fill-rule: evenodd;"/>
+			<text x="40" y="793.8897637795277" style="font-family: Helvetica-Bold; font-size: 20px;fill: rgb(9%,21%,36%); stroke:none;" transform="translate(0,1587) scale(1,-1)">SMART FALL-GUARD - HARDWARE SCHEMATIC</text>
+			<text x="40" y="771.8897637795277" style="font-family: Helvetica; font-size: 10px;fill: rgb(32%,39%,47%); stroke:none;" transform="translate(0,1543) scale(1,-1)">SP1-HW-01 | ESP32 DevKit 30-pin | MPU6050 | USB-first + protected Li-Po power path | Rev B</text>
+			<text x="1094.5241811023623" y="793.8897637795277" style="font-family: Helvetica-Bold; font-size: 9px;fill: rgb(9%,21%,36%); stroke:none;" transform="translate(0,1587) scale(1,-1)">26 OCT 2026</text>
+			<text x="45" y="720" style="font-family: Helvetica-Bold; font-size: 12px;fill: rgb(9%,21%,36%); stroke:none;" transform="translate(0,1440) scale(1,-1)">1. POWER, CHARGING AND USB PROGRAMMING ISOLATION</text>
+			<rect x="45" y="590" width="115" height="75" rx="7" ry="7" style="stroke: rgb(9%,21%,36%); stroke-linecap: butt; stroke-width: 1.5; fill: rgb(91%,94%,97%); fill-rule: evenodd;"/>
+			<text x="57.884" y="645" style="font-family: Helvetica-Bold; font-size: 11px;fill: rgb(9%,21%,36%); stroke:none;" transform="translate(0,1290) scale(1,-1)">J1 USB CHARGE</text>
+			<text x="87.69875" y="604" style="font-family: Helvetica; font-size: 7.5px;fill: rgb(32%,39%,47%); stroke:none;" transform="translate(0,1208) scale(1,-1)">5 V input</text>
+			<rect x="210" y="580" width="160" height="95" rx="7" ry="7" style="stroke: rgb(9%,21%,36%); stroke-linecap: butt; stroke-width: 1.5; fill: rgb(91%,94%,97%); fill-rule: evenodd;"/>
+			<text x="232.54149999999998" y="655" style="font-family: Helvetica-Bold; font-size: 11px;fill: rgb(9%,21%,36%); stroke:none;" transform="translate(0,1310) scale(1,-1)">U3 BQ24074 MODULE</text>
+			<text x="257.07125" y="594" style="font-family: Helvetica; font-size: 7.5px;fill: rgb(32%,39%,47%); stroke:none;" transform="translate(0,1188) scale(1,-1)">Power-path charger</text>
+			<rect x="420" y="590" width="95" height="75" rx="7" ry="7" style="stroke: rgb(9%,21%,36%); stroke-linecap: butt; stroke-width: 1.5; fill: rgb(91%,94%,97%); fill-rule: evenodd;"/>
+			<text x="433.2735" y="645" style="font-family: Helvetica-Bold; font-size: 11px;fill: rgb(9%,21%,36%); stroke:none;" transform="translate(0,1290) scale(1,-1)">SW2 POWER</text>
+			<text x="457.705" y="604" style="font-family: Helvetica; font-size: 7.5px;fill: rgb(32%,39%,47%); stroke:none;" transform="translate(0,1208) scale(1,-1)">SPST</text>
+			<rect x="565" y="580" width="165" height="95" rx="7" ry="7" style="stroke: rgb(9%,21%,36%); stroke-linecap: butt; stroke-width: 1.5; fill: rgb(91%,94%,97%); fill-rule: evenodd;"/>
+			<text x="612.9545" y="655" style="font-family: Helvetica-Bold; font-size: 11px;fill: rgb(9%,21%,36%); stroke:none;" transform="translate(0,1310) scale(1,-1)">U4 TPS63070</text>
+			<text x="618.94375" y="594" style="font-family: Helvetica; font-size: 7.5px;fill: rgb(32%,39%,47%); stroke:none;" transform="translate(0,1188) scale(1,-1)">Buck-boost 3.3 V</text>
+			<rect x="780" y="590" width="100" height="75" rx="7" ry="7" style="stroke: rgb(71%,47%,12%); stroke-linecap: butt; stroke-width: 1.5; fill: rgb(100%,95%,90%); fill-rule: evenodd;"/>
+			<text x="794.8495" y="645" style="font-family: Helvetica-Bold; font-size: 11px;fill: rgb(71%,47%,12%); stroke:none;" transform="translate(0,1290) scale(1,-1)">JP1 ISOLATE</text>
+			<text x="798.53375" y="604" style="font-family: Helvetica; font-size: 7.5px;fill: rgb(32%,39%,47%); stroke:none;" transform="translate(0,1208) scale(1,-1)">Removable jumper</text>
+			<rect x="930" y="580" width="205" height="95" rx="7" ry="7" style="stroke: rgb(9%,21%,36%); stroke-linecap: butt; stroke-width: 1.5; fill: rgb(91%,94%,97%); fill-rule: evenodd;"/>
+			<text x="995.3585" y="655" style="font-family: Helvetica-Bold; font-size: 11px;fill: rgb(9%,21%,36%); stroke:none;" transform="translate(0,1310) scale(1,-1)">SYSTEM +3V3</text>
+			<text x="982.58" y="594" style="font-family: Helvetica; font-size: 7.5px;fill: rgb(32%,39%,47%); stroke:none;" transform="translate(0,1188) scale(1,-1)">ESP32 + IMU + LED + buzzer</text>
+			<polyline points="160 627, 210 627" style="stroke: rgb(3%,49%,35%); stroke-linecap: butt; stroke-width: 2; fill: None; fill-rule: evenodd;"/>
+			<circle cx="175" cy="627" r="2.4" style="stroke: rgb(3%,49%,35%); stroke-linecap: butt; stroke-width: 1; fill: rgb(3%,49%,35%); fill-rule: evenodd;"/>
+			<text x="180" y="632" style="font-family: Helvetica-Bold; font-size: 7.5px;fill: rgb(3%,49%,35%); stroke:none;" transform="translate(0,1264) scale(1,-1)">USB5V</text>
+			<polyline points="370 627, 420 627" style="stroke: rgb(3%,49%,35%); stroke-linecap: butt; stroke-width: 2; fill: None; fill-rule: evenodd;"/>
+			<circle cx="382" cy="627" r="2.4" style="stroke: rgb(3%,49%,35%); stroke-linecap: butt; stroke-width: 1; fill: rgb(3%,49%,35%); fill-rule: evenodd;"/>
+			<text x="387" y="632" style="font-family: Helvetica-Bold; font-size: 7.5px;fill: rgb(3%,49%,35%); stroke:none;" transform="translate(0,1264) scale(1,-1)">CHG_SYS</text>
+			<polyline points="515 627, 565 627" style="stroke: rgb(3%,49%,35%); stroke-linecap: butt; stroke-width: 2; fill: None; fill-rule: evenodd;"/>
+			<circle cx="525" cy="627" r="2.4" style="stroke: rgb(3%,49%,35%); stroke-linecap: butt; stroke-width: 1; fill: rgb(3%,49%,35%); fill-rule: evenodd;"/>
+			<text x="530" y="632" style="font-family: Helvetica-Bold; font-size: 7.5px;fill: rgb(3%,49%,35%); stroke:none;" transform="translate(0,1264) scale(1,-1)">REG_IN</text>
+			<polyline points="730 627, 780 627" style="stroke: rgb(3%,49%,35%); stroke-linecap: butt; stroke-width: 2; fill: None; fill-rule: evenodd;"/>
+			<circle cx="742" cy="627" r="2.4" style="stroke: rgb(3%,49%,35%); stroke-linecap: butt; stroke-width: 1; fill: rgb(3%,49%,35%); fill-rule: evenodd;"/>
+			<text x="747" y="632" style="font-family: Helvetica-Bold; font-size: 7.5px;fill: rgb(3%,49%,35%); stroke:none;" transform="translate(0,1264) scale(1,-1)">REG_3V3</text>
+			<polyline points="880 627, 930 627" style="stroke: rgb(3%,49%,35%); stroke-linecap: butt; stroke-width: 2; fill: None; fill-rule: evenodd;"/>
+			<circle cx="892" cy="627" r="2.4" style="stroke: rgb(3%,49%,35%); stroke-linecap: butt; stroke-width: 1; fill: rgb(3%,49%,35%); fill-rule: evenodd;"/>
+			<text x="897" y="632" style="font-family: Helvetica-Bold; font-size: 7.5px;fill: rgb(3%,49%,35%); stroke:none;" transform="translate(0,1264) scale(1,-1)">+3V3</text>
+			<polyline points="102 590, 102 572" style="stroke: rgb(3%,49%,35%); stroke-linecap: butt; stroke-width: 2; fill: None; fill-rule: evenodd;"/>
+			<circle cx="102" cy="572" r="2.4" style="stroke: rgb(3%,49%,35%); stroke-linecap: butt; stroke-width: 1; fill: rgb(3%,49%,35%); fill-rule: evenodd;"/>
+			<text x="107" y="577" style="font-family: Helvetica-Bold; font-size: 7.5px;fill: rgb(3%,49%,35%); stroke:none;" transform="translate(0,1154) scale(1,-1)">GND</text>
+			<polyline points="290 580, 290 562" style="stroke: rgb(3%,49%,35%); stroke-linecap: butt; stroke-width: 2; fill: None; fill-rule: evenodd;"/>
+			<circle cx="290" cy="562" r="2.4" style="stroke: rgb(3%,49%,35%); stroke-linecap: butt; stroke-width: 1; fill: rgb(3%,49%,35%); fill-rule: evenodd;"/>
+			<text x="295" y="567" style="font-family: Helvetica-Bold; font-size: 7.5px;fill: rgb(3%,49%,35%); stroke:none;" transform="translate(0,1134) scale(1,-1)">GND</text>
+			<polyline points="647 580, 647 562" style="stroke: rgb(3%,49%,35%); stroke-linecap: butt; stroke-width: 2; fill: None; fill-rule: evenodd;"/>
+			<circle cx="647" cy="562" r="2.4" style="stroke: rgb(3%,49%,35%); stroke-linecap: butt; stroke-width: 1; fill: rgb(3%,49%,35%); fill-rule: evenodd;"/>
+			<text x="652" y="567" style="font-family: Helvetica-Bold; font-size: 7.5px;fill: rgb(3%,49%,35%); stroke:none;" transform="translate(0,1134) scale(1,-1)">GND</text>
+			<polyline points="1032 580, 1032 562" style="stroke: rgb(3%,49%,35%); stroke-linecap: butt; stroke-width: 2; fill: None; fill-rule: evenodd;"/>
+			<circle cx="1032" cy="562" r="2.4" style="stroke: rgb(3%,49%,35%); stroke-linecap: butt; stroke-width: 1; fill: rgb(3%,49%,35%); fill-rule: evenodd;"/>
+			<text x="1037" y="567" style="font-family: Helvetica-Bold; font-size: 7.5px;fill: rgb(3%,49%,35%); stroke:none;" transform="translate(0,1134) scale(1,-1)">GND</text>
+			<rect x="245" y="455" width="140" height="75" rx="7" ry="7" style="stroke: rgb(9%,21%,36%); stroke-linecap: butt; stroke-width: 1.5; fill: rgb(95%,94%,100%); fill-rule: evenodd;"/>
+			<text x="269.163" y="510" style="font-family: Helvetica-Bold; font-size: 11px;fill: rgb(9%,21%,36%); stroke:none;" transform="translate(0,1020) scale(1,-1)">BT1 PROTECTED</text>
+			<text x="271.44" y="469" style="font-family: Helvetica; font-size: 7.5px;fill: rgb(32%,39%,47%); stroke:none;" transform="translate(0,938) scale(1,-1)">Li-Po 1S, polarity checked</text>
+			<polyline points="325 530, 325 560, 335 560, 335 580" style="stroke: rgb(70%,13%,9%); stroke-linecap: butt; stroke-width: 2; fill: None; fill-rule: evenodd;"/>
+			<circle cx="325" cy="545" r="2.4" style="stroke: rgb(3%,49%,35%); stroke-linecap: butt; stroke-width: 1; fill: rgb(3%,49%,35%); fill-rule: evenodd;"/>
+			<text x="330" y="550" style="font-family: Helvetica-Bold; font-size: 7.5px;fill: rgb(3%,49%,35%); stroke:none;" transform="translate(0,1100) scale(1,-1)">BAT+</text>
+			<polyline points="365 455, 365 435" style="stroke: rgb(3%,49%,35%); stroke-linecap: butt; stroke-width: 2; fill: None; fill-rule: evenodd;"/>
+			<circle cx="365" cy="435" r="2.4" style="stroke: rgb(3%,49%,35%); stroke-linecap: butt; stroke-width: 1; fill: rgb(3%,49%,35%); fill-rule: evenodd;"/>
+			<text x="370" y="440" style="font-family: Helvetica-Bold; font-size: 7.5px;fill: rgb(3%,49%,35%); stroke:none;" transform="translate(0,880) scale(1,-1)">GND</text>
+			<text x="45" y="545" style="font-family: Helvetica-Bold; font-size: 8.5px;fill: rgb(70%,13%,9%); stroke:none;" transform="translate(0,1090) scale(1,-1)">Charge limit: &lt;=500 mA and &lt;= cell datasheet rating</text>
+			<rect x="765" y="455" width="370" height="80" rx="6" ry="6" style="stroke: rgb(70%,13%,9%); stroke-linecap: butt; stroke-width: 1.2; fill: rgb(100%,96%,96%); fill-rule: evenodd;"/>
+			<text x="780" y="510" style="font-family: Helvetica-Bold; font-size: 10px;fill: rgb(70%,13%,9%); stroke:none;" transform="translate(0,1020) scale(1,-1)">USB PROGRAMMING PROCEDURE</text>
+			<text x="780" y="490" style="font-family: Helvetica; font-size: 8.5px;fill: rgb(70%,13%,9%); stroke:none;" transform="translate(0,980) scale(1,-1)">1) Switch SW2 OFF   2) OPEN JP1   3) Connect DevKit USB</text>
+			<text x="780" y="472" style="font-family: Helvetica; font-size: 8.5px;fill: rgb(70%,13%,9%); stroke:none;" transform="translate(0,944) scale(1,-1)">Never power the DevKit from USB and external 3V3 at the same time.</text>
+			<text x="45" y="420" style="font-family: Helvetica-Bold; font-size: 12px;fill: rgb(9%,21%,36%); stroke:none;" transform="translate(0,840) scale(1,-1)">2. CONTROLLER AND SENSOR</text>
+			<rect x="45" y="260" width="220" height="125" rx="7" ry="7" style="stroke: rgb(9%,21%,36%); stroke-linecap: butt; stroke-width: 1.5; fill: rgb(91%,94%,97%); fill-rule: evenodd;"/>
+			<text x="88.97800000000001" y="365" style="font-family: Helvetica-Bold; font-size: 11px;fill: rgb(9%,21%,36%); stroke:none;" transform="translate(0,730) scale(1,-1)">U1 ESP32 DEVKIT 30-PIN</text>
+			<text x="100.40375" y="274" style="font-family: Helvetica; font-size: 7.5px;fill: rgb(32%,39%,47%); stroke:none;" transform="translate(0,548) scale(1,-1)">3V3 rail from JP1; GND common</text>
+			<text x="62" y="335" style="font-family: Helvetica-Bold; font-size: 8px;fill: rgb(9%,21%,36%); stroke:none;" transform="translate(0,670) scale(1,-1)">GPIO21  SDA</text>
+			<text x="62" y="315" style="font-family: Helvetica-Bold; font-size: 8px;fill: rgb(9%,21%,36%); stroke:none;" transform="translate(0,630) scale(1,-1)">GPIO22  SCL</text>
+			<text x="62" y="295" style="font-family: Helvetica-Bold; font-size: 8px;fill: rgb(9%,21%,36%); stroke:none;" transform="translate(0,590) scale(1,-1)">GPIO18  CANCEL</text>
+			<text x="155" y="335" style="font-family: Helvetica-Bold; font-size: 8px;fill: rgb(9%,21%,36%); stroke:none;" transform="translate(0,670) scale(1,-1)">GPIO19  BUZZER</text>
+			<text x="155" y="315" style="font-family: Helvetica-Bold; font-size: 8px;fill: rgb(9%,21%,36%); stroke:none;" transform="translate(0,630) scale(1,-1)">GPIO23  LED</text>
+			<rect x="360" y="260" width="210" height="125" rx="7" ry="7" style="stroke: rgb(9%,21%,36%); stroke-linecap: butt; stroke-width: 1.5; fill: rgb(91%,94%,97%); fill-rule: evenodd;"/>
+			<text x="399.297" y="365" style="font-family: Helvetica-Bold; font-size: 11px;fill: rgb(9%,21%,36%); stroke:none;" transform="translate(0,730) scale(1,-1)">U2 MPU6050 BREAKOUT</text>
+			<text x="414.6675" y="274" style="font-family: Helvetica; font-size: 7.5px;fill: rgb(32%,39%,47%); stroke:none;" transform="translate(0,548) scale(1,-1)">VCC=3V3, AD0=GND -&gt; 0x68</text>
+			<polyline points="265 335, 360 335" style="stroke: rgb(3%,49%,35%); stroke-linecap: butt; stroke-width: 2; fill: None; fill-rule: evenodd;"/>
+			<circle cx="285" cy="335" r="2.4" style="stroke: rgb(3%,49%,35%); stroke-linecap: butt; stroke-width: 1; fill: rgb(3%,49%,35%); fill-rule: evenodd;"/>
+			<text x="290" y="340" style="font-family: Helvetica-Bold; font-size: 7.5px;fill: rgb(3%,49%,35%); stroke:none;" transform="translate(0,680) scale(1,-1)">SDA</text>
+			<polyline points="265 315, 360 315" style="stroke: rgb(3%,49%,35%); stroke-linecap: butt; stroke-width: 2; fill: None; fill-rule: evenodd;"/>
+			<circle cx="285" cy="315" r="2.4" style="stroke: rgb(3%,49%,35%); stroke-linecap: butt; stroke-width: 1; fill: rgb(3%,49%,35%); fill-rule: evenodd;"/>
+			<text x="290" y="320" style="font-family: Helvetica-Bold; font-size: 7.5px;fill: rgb(3%,49%,35%); stroke:none;" transform="translate(0,640) scale(1,-1)">SCL</text>
+			<rect x="620" y="310" width="115" height="55" rx="7" ry="7" style="stroke: rgb(9%,21%,36%); stroke-linecap: butt; stroke-width: 1.5; fill: rgb(91%,94%,97%); fill-rule: evenodd;"/>
+			<text x="658.239" y="345" style="font-family: Helvetica-Bold; font-size: 11px;fill: rgb(9%,21%,36%); stroke:none;" transform="translate(0,690) scale(1,-1)">R4 4.7k</text>
+			<text x="642.48625" y="324" style="font-family: Helvetica; font-size: 7.5px;fill: rgb(32%,39%,47%); stroke:none;" transform="translate(0,648) scale(1,-1)">Optional SDA pull-up</text>
+			<rect x="620" y="245" width="115" height="55" rx="7" ry="7" style="stroke: rgb(9%,21%,36%); stroke-linecap: butt; stroke-width: 1.5; fill: rgb(91%,94%,97%); fill-rule: evenodd;"/>
+			<text x="658.239" y="280" style="font-family: Helvetica-Bold; font-size: 11px;fill: rgb(9%,21%,36%); stroke:none;" transform="translate(0,560) scale(1,-1)">R5 4.7k</text>
+			<text x="642.9025" y="259" style="font-family: Helvetica; font-size: 7.5px;fill: rgb(32%,39%,47%); stroke:none;" transform="translate(0,518) scale(1,-1)">Optional SCL pull-up</text>
+			<polyline points="675 365, 675 390" style="stroke: rgb(3%,49%,35%); stroke-linecap: butt; stroke-width: 2; fill: None; fill-rule: evenodd;"/>
+			<circle cx="675" cy="390" r="2.4" style="stroke: rgb(3%,49%,35%); stroke-linecap: butt; stroke-width: 1; fill: rgb(3%,49%,35%); fill-rule: evenodd;"/>
+			<text x="680" y="395" style="font-family: Helvetica-Bold; font-size: 7.5px;fill: rgb(3%,49%,35%); stroke:none;" transform="translate(0,790) scale(1,-1)">+3V3</text>
+			<polyline points="675 310, 675 304" style="stroke: rgb(3%,49%,35%); stroke-linecap: butt; stroke-width: 2; fill: None; fill-rule: evenodd;"/>
+			<circle cx="675" cy="304" r="2.4" style="stroke: rgb(3%,49%,35%); stroke-linecap: butt; stroke-width: 1; fill: rgb(3%,49%,35%); fill-rule: evenodd;"/>
+			<text x="680" y="309" style="font-family: Helvetica-Bold; font-size: 7.5px;fill: rgb(3%,49%,35%); stroke:none;" transform="translate(0,618) scale(1,-1)">SDA</text>
+			<polyline points="675 300, 750 300, 750 390" style="stroke: rgb(3%,49%,35%); stroke-linecap: butt; stroke-width: 2; fill: None; fill-rule: evenodd;"/>
+			<circle cx="750" cy="390" r="2.4" style="stroke: rgb(3%,49%,35%); stroke-linecap: butt; stroke-width: 1; fill: rgb(3%,49%,35%); fill-rule: evenodd;"/>
+			<text x="755" y="395" style="font-family: Helvetica-Bold; font-size: 7.5px;fill: rgb(3%,49%,35%); stroke:none;" transform="translate(0,790) scale(1,-1)">+3V3</text>
+			<polyline points="675 245, 675 230" style="stroke: rgb(3%,49%,35%); stroke-linecap: butt; stroke-width: 2; fill: None; fill-rule: evenodd;"/>
+			<circle cx="675" cy="230" r="2.4" style="stroke: rgb(3%,49%,35%); stroke-linecap: butt; stroke-width: 1; fill: rgb(3%,49%,35%); fill-rule: evenodd;"/>
+			<text x="680" y="235" style="font-family: Helvetica-Bold; font-size: 7.5px;fill: rgb(3%,49%,35%); stroke:none;" transform="translate(0,470) scale(1,-1)">SCL</text>
+			<rect x="790" y="260" width="130" height="125" rx="7" ry="7" style="stroke: rgb(9%,21%,36%); stroke-linecap: butt; stroke-width: 1.5; fill: rgb(91%,94%,97%); fill-rule: evenodd;"/>
+			<text x="829.018" y="365" style="font-family: Helvetica-Bold; font-size: 11px;fill: rgb(9%,21%,36%); stroke:none;" transform="translate(0,730) scale(1,-1)">C1 100 nF</text>
+			<text x="814.995" y="274" style="font-family: Helvetica; font-size: 7.5px;fill: rgb(32%,39%,47%); stroke:none;" transform="translate(0,548) scale(1,-1)">Close to IMU VCC/GND</text>
+			<polyline points="855 385, 855 405" style="stroke: rgb(3%,49%,35%); stroke-linecap: butt; stroke-width: 2; fill: None; fill-rule: evenodd;"/>
+			<circle cx="855" cy="405" r="2.4" style="stroke: rgb(3%,49%,35%); stroke-linecap: butt; stroke-width: 1; fill: rgb(3%,49%,35%); fill-rule: evenodd;"/>
+			<text x="860" y="410" style="font-family: Helvetica-Bold; font-size: 7.5px;fill: rgb(3%,49%,35%); stroke:none;" transform="translate(0,820) scale(1,-1)">+3V3</text>
+			<polyline points="855 260, 855 240" style="stroke: rgb(3%,49%,35%); stroke-linecap: butt; stroke-width: 2; fill: None; fill-rule: evenodd;"/>
+			<circle cx="855" cy="240" r="2.4" style="stroke: rgb(3%,49%,35%); stroke-linecap: butt; stroke-width: 1; fill: rgb(3%,49%,35%); fill-rule: evenodd;"/>
+			<text x="860" y="245" style="font-family: Helvetica-Bold; font-size: 7.5px;fill: rgb(3%,49%,35%); stroke:none;" transform="translate(0,490) scale(1,-1)">GND</text>
+			<text x="960" y="350" style="font-family: Helvetica-Bold; font-size: 9px;fill: rgb(9%,21%,36%); stroke:none;" transform="translate(0,700) scale(1,-1)">I2C pull-ups</text>
+			<text x="960" y="330" style="font-family: Helvetica; font-size: 8px;fill: rgb(32%,39%,47%); stroke:none;" transform="translate(0,660) scale(1,-1)">Fit R4/R5 only if the</text>
+			<text x="960" y="314" style="font-family: Helvetica; font-size: 8px;fill: rgb(32%,39%,47%); stroke:none;" transform="translate(0,628) scale(1,-1)">purchased MPU6050 board</text>
+			<text x="960" y="298" style="font-family: Helvetica; font-size: 8px;fill: rgb(32%,39%,47%); stroke:none;" transform="translate(0,596) scale(1,-1)">does not already include</text>
+			<text x="960" y="282" style="font-family: Helvetica; font-size: 8px;fill: rgb(32%,39%,47%); stroke:none;" transform="translate(0,564) scale(1,-1)">suitable 3.3 V pull-ups.</text>
+			<text x="45" y="215" style="font-family: Helvetica-Bold; font-size: 12px;fill: rgb(9%,21%,36%); stroke:none;" transform="translate(0,430) scale(1,-1)">3. USER INPUT, STATUS LED AND BUZZER DRIVER</text>
+			<rect x="45" y="85" width="250" height="95" rx="7" ry="7" style="stroke: rgb(9%,21%,36%); stroke-linecap: butt; stroke-width: 1.5; fill: rgb(91%,94%,97%); fill-rule: evenodd;"/>
+			<text x="109.1975" y="160" style="font-family: Helvetica-Bold; font-size: 11px;fill: rgb(9%,21%,36%); stroke:none;" transform="translate(0,320) scale(1,-1)">SW1 CANCEL BUTTON</text>
+			<text x="93.4175" y="99" style="font-family: Helvetica; font-size: 7.5px;fill: rgb(32%,39%,47%); stroke:none;" transform="translate(0,198) scale(1,-1)">NO switch: GPIO18 -&gt; GND; INPUT_PULLUP</text>
+			<polyline points="75 125, 45 125" style="stroke: rgb(3%,49%,35%); stroke-linecap: butt; stroke-width: 2; fill: None; fill-rule: evenodd;"/>
+			<circle cx="45" cy="125" r="2.4" style="stroke: rgb(3%,49%,35%); stroke-linecap: butt; stroke-width: 1; fill: rgb(3%,49%,35%); fill-rule: evenodd;"/>
+			<text x="50" y="130" style="font-family: Helvetica-Bold; font-size: 7.5px;fill: rgb(3%,49%,35%); stroke:none;" transform="translate(0,260) scale(1,-1)">CANCEL</text>
+			<polyline points="265 125, 295 125" style="stroke: rgb(3%,49%,35%); stroke-linecap: butt; stroke-width: 2; fill: None; fill-rule: evenodd;"/>
+			<circle cx="280" cy="125" r="2.4" style="stroke: rgb(3%,49%,35%); stroke-linecap: butt; stroke-width: 1; fill: rgb(3%,49%,35%); fill-rule: evenodd;"/>
+			<text x="285" y="130" style="font-family: Helvetica-Bold; font-size: 7.5px;fill: rgb(3%,49%,35%); stroke:none;" transform="translate(0,260) scale(1,-1)">GND</text>
+			<rect x="350" y="85" width="260" height="95" rx="7" ry="7" style="stroke: rgb(9%,21%,36%); stroke-linecap: butt; stroke-width: 1.5; fill: rgb(91%,94%,97%); fill-rule: evenodd;"/>
+			<text x="445.471" y="160" style="font-family: Helvetica-Bold; font-size: 11px;fill: rgb(9%,21%,36%); stroke:none;" transform="translate(0,320) scale(1,-1)">STATUS LED</text>
+			<text x="415.49625000000003" y="99" style="font-family: Helvetica; font-size: 7.5px;fill: rgb(32%,39%,47%); stroke:none;" transform="translate(0,198) scale(1,-1)">GPIO23 -&gt; R3 330R -&gt; D1 red -&gt; GND</text>
+			<polyline points="380 125, 350 125" style="stroke: rgb(3%,49%,35%); stroke-linecap: butt; stroke-width: 2; fill: None; fill-rule: evenodd;"/>
+			<circle cx="350" cy="125" r="2.4" style="stroke: rgb(3%,49%,35%); stroke-linecap: butt; stroke-width: 1; fill: rgb(3%,49%,35%); fill-rule: evenodd;"/>
+			<text x="355" y="130" style="font-family: Helvetica-Bold; font-size: 7.5px;fill: rgb(3%,49%,35%); stroke:none;" transform="translate(0,260) scale(1,-1)">LED_CTRL</text>
+			<polyline points="580 125, 610 125" style="stroke: rgb(3%,49%,35%); stroke-linecap: butt; stroke-width: 2; fill: None; fill-rule: evenodd;"/>
+			<circle cx="595" cy="125" r="2.4" style="stroke: rgb(3%,49%,35%); stroke-linecap: butt; stroke-width: 1; fill: rgb(3%,49%,35%); fill-rule: evenodd;"/>
+			<text x="600" y="130" style="font-family: Helvetica-Bold; font-size: 7.5px;fill: rgb(3%,49%,35%); stroke:none;" transform="translate(0,260) scale(1,-1)">GND</text>
+			<rect x="665" y="70" width="470" height="125" rx="7" ry="7" style="stroke: rgb(9%,21%,36%); stroke-linecap: butt; stroke-width: 1.5; fill: rgb(91%,94%,97%); fill-rule: evenodd;"/>
+			<text x="826.3605" y="175" style="font-family: Helvetica-Bold; font-size: 11px;fill: rgb(9%,21%,36%); stroke:none;" transform="translate(0,350) scale(1,-1)">BUZZER LOW-SIDE DRIVER</text>
+			<text x="815.5875" y="84" style="font-family: Helvetica; font-size: 7.5px;fill: rgb(32%,39%,47%); stroke:none;" transform="translate(0,168) scale(1,-1)">GPIO19 -&gt; R1 1k -&gt; Q1 base; R2 10k base-emitter</text>
+			<text x="735" y="135" style="font-family: Helvetica-Bold; font-size: 9px;fill: rgb(9%,21%,36%); stroke:none;" transform="translate(0,270) scale(1,-1)">BZ1 passive piezo 3.3 V / &lt;=20 mA</text>
+			<text x="735" y="115" style="font-family: Helvetica; font-size: 8.5px;fill: rgb(32%,39%,47%); stroke:none;" transform="translate(0,230) scale(1,-1)">+3V3 -&gt; BZ1 -&gt; Q1 collector; Q1 emitter -&gt; GND</text>
+			<text x="735" y="95" style="font-family: Helvetica; font-size: 8.5px;fill: rgb(70%,13%,9%); stroke:none;" transform="translate(0,190) scale(1,-1)">Verify transistor B/C/E pinout before wiring.</text>
+			<polyline points="665 130, 625 130" style="stroke: rgb(3%,49%,35%); stroke-linecap: butt; stroke-width: 2; fill: None; fill-rule: evenodd;"/>
+			<circle cx="625" cy="130" r="2.4" style="stroke: rgb(3%,49%,35%); stroke-linecap: butt; stroke-width: 1; fill: rgb(3%,49%,35%); fill-rule: evenodd;"/>
+			<text x="630" y="135" style="font-family: Helvetica-Bold; font-size: 7.5px;fill: rgb(3%,49%,35%); stroke:none;" transform="translate(0,270) scale(1,-1)">BUZZER_CTRL</text>
+			<text x="45" y="47" style="font-family: Helvetica-Bold; font-size: 8.5px;fill: rgb(9%,21%,36%); stroke:none;" transform="translate(0,94) scale(1,-1)">DESIGN STATUS: schematic complete at module level; footprints and physical pinout are intentionally pending purchased-part verification.</text>
+			<text x="1103.5016811023622" y="47" style="font-family: Helvetica-Bold; font-size: 8.5px;fill: rgb(32%,39%,47%); stroke:none;" transform="translate(0,94) scale(1,-1)">Sheet 1 / 1</text>
+		</g>
+	</g>
+</svg>

@@ -1,6 +1,6 @@
 # Linh kiện cần mua và đấu nối prototype
 
-Danh sách phục vụ một prototype cổ tay. Chốt mã bo/module cụ thể trước khi đặt mua; sơ đồ PDF/PNG hiện còn rỗng và chưa được duyệt. Không có giá/tồn kho đã xác minh.
+Danh sách phục vụ một prototype cổ tay. Sơ đồ Rev B đã có tại `docs/hardware_schematic.pdf` và `docs/hardware_schematic.png`; vẫn phải chốt mã bo/module cụ thể và đối chiếu pinout trước khi đặt mua. Không có giá/tồn kho đã xác minh.
 
 ## Giai đoạn 1: chạy USB
 
@@ -25,7 +25,7 @@ Nút nối GPIO18 với GND, INPUT_PULLUP và debounce. LED phải nối tiếp 
 
 | Linh kiện | Số lượng | Tiêu chí |
 |---|---:|---|
-| Pin Li-Po 1S có bảo vệ | 1–2 | Chọn kích thước/dung lượng sau đo dòng; có thông số dòng xả và dòng sạc, đúng cực đầu nối |
+| Pin Li-Po 1S có bảo vệ | 1–2 | Chọn kích thước/dung lượng sau đo dòng; có thông số dòng xả và dòng sạc, đúng cực đầu nối; cấu hình hiện giới hạn tối đa 500 mA và phải giảm nếu pin không cho phép |
 | Module sạc có power path, ví dụ BQ24074 | 1 | Đặt dòng sạc phù hợp viên pin; pin bảo vệ và power path là hai chức năng riêng |
 | Module buck-boost 3,3 V, ví dụ dựa trên TPS63070 | 1 | Dải vào bao phủ pin và đầu ra SYS mạch sạc; xác minh dòng đầu ra thực ≥500 mA ở toàn dải dùng và đáp ứng tải Wi-Fi |
 | Công tắc, đầu nối pin và dây phù hợp | 1 bộ | Có cách ngắt nguồn khi nạp/debug, tránh cắm ngược |
@@ -34,7 +34,7 @@ Nút nối GPIO18 với GND, INPUT_PULLUP và debounce. LED phải nối tiếp 
 | Thiết bị ghi dòng/power analyzer | Mượn hoặc mua 1 | Đo trung bình và xung; USB meter không đại diện hoàn toàn cho hiệu suất khi chạy pin |
 | Vỏ cách điện + dây đeo + PCB hàn | 1 bộ | Cố định cảm biến, che chân dẫn điện, chừa anten và tiếp cận nút hủy |
 
-Đường nguồn mục tiêu: USB → charger power path ↔ pin; SYS → buck-boost 3,3 V → ESP32 + IMU. Không cấp SYS của charger trực tiếp vào chân 3V3 vì có thể vượt 3,3 V.
+Đường nguồn Rev B: USB → charger power path ↔ pin; SYS → công tắc → buck-boost 3,3 V → jumper JP1 → ESP32 + IMU. Không cấp SYS của charger trực tiếp vào chân 3V3 vì có thể vượt 3,3 V. Tắt công tắc và mở JP1 trước khi cắm USB của DevKit.
 
 Không dùng Li-Po 1S → AMS1117-3.3 V: thiếu headroom khi điện áp pin giảm. TP4056 đơn thuần không thay thế chức năng power path; module có bảo vệ pin chưa chắc có chia nguồn tải/sạc. Cần kiểm tra đúng module thay vì chỉ tên IC.
 
