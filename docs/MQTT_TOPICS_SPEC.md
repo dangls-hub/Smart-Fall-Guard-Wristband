@@ -1,4 +1,6 @@
-# Hợp đồng MQTT dự kiến — chưa triển khai consumer/firmware
+# Hợp đồng MQTT mục tiêu
+
+SP1-BE-01 đã triển khai transport backend: subscribe `fallguard/v1/devices/+/+`, log topic/JSON và bỏ qua JSON lỗi. Chưa có ingest theo schema, đối chiếu device_id, lưu CSDL, chống trùng, ACK nghiệp vụ hoặc firmware tương ứng. Các hành vi nghiệp vụ dưới đây vẫn là kế hoạch.
 
 Prefix: fallguard/v1/devices/{device_id}. Username mỗi thiết bị bằng device_id; backend dùng fallguard_backend. ID chỉ dùng chữ, số, dấu gạch dưới/gạch ngang; không chứa /, +, #. Server phải đối chiếu ID trong payload với ID trong topic.
 
