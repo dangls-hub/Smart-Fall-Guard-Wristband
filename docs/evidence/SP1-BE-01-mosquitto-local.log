@@ -1,0 +1,114 @@
+Runtime: Node.js 22; real local Mosquitto; no mocks
+TAP version 13
+# [MQTT] Connecting (mqtt, port 1883)
+# Smart Fall-Guard backend running at http://127.0.0.1:49988
+# [MQTT] Connected
+# [MQTT] Subscribed fallguard/v1/devices/+/+ (QoS 1)
+# [Evidence] Node v22.23.4; real broker auth and SUBACK successful
+# Subtest: real Mosquitto local acceptance (no mocks)
+    # Subtest: backend authenticates and subscribes; HTTP serves
+    ok 1 - backend authenticates and subscribes; HTTP serves
+      ---
+      duration_ms: 100.7364
+      type: 'test'
+      ...
+# [MQTT] Message fallguard/v1/devices/esp32_001/telemetry {
+#   device_id: 'esp32_001',
+#   source: 'simulator',
+#   sample_id: 'sp1be01-1793205130720-valid',
+#   svm: 1.02
+# }
+    # Subtest: valid telemetry passes device -> Mosquitto -> backend with parsed JSON
+    ok 2 - valid telemetry passes device -> Mosquitto -> backend with parsed JSON
+      ---
+      duration_ms: 27.0755
+      type: 'test'
+      ...
+# [MQTT] Invalid JSON on fallguard/v1/devices/esp32_001/telemetry; message ignored
+# [MQTT] Message fallguard/v1/devices/esp32_001/telemetry {
+#   device_id: 'esp32_001',
+#   source: 'simulator',
+#   sample_id: 'sp1be01-1793205130720-after-invalid',
+#   svm: 1.02
+# }
+    # Subtest: malformed JSON is ignored; the next valid sample still arrives
+    ok 3 - malformed JSON is ignored; the next valid sample still arrives
+      ---
+      duration_ms: 57.7833
+      type: 'test'
+      ...
+# [MQTT] Message fallguard/v1/devices/esp32_002/telemetry {
+#   device_id: 'esp32_002',
+#   source: 'simulator',
+#   sample_id: 'sp1be01-1793205130720-acl-control-before',
+#   svm: 1.02
+# }
+# [MQTT] Message fallguard/v1/devices/esp32_002/telemetry {
+#   device_id: 'esp32_002',
+#   source: 'simulator',
+#   sample_id: 'sp1be01-1793205130720-acl-control-after',
+#   svm: 1.02
+# }
+# [Evidence] ACL: both authorized controls delivered; cross-device marker delivered 0 times
+# [Docker] compose stop -t 3 mosquitto: exit 0
+    # Subtest: ACL blocks cross-device publish, with positive subscriber controls
+    ok 4 - ACL blocks cross-device publish, with positive subscriber controls
+      ---
+      duration_ms: 1567.1072
+      type: 'test'
+      ...
+# [MQTT] Offline; HTTP remains available
+# [MQTT] Connection closed; retry pending
+# [MQTT] Reconnecting
+# [MQTT] Connection error (ECONNREFUSED); HTTP remains available
+# [MQTT] Connection closed; retry pending
+# [Evidence] Broker stopped: HTTP 404 twice; backend retry observed
+# [Docker] compose start mosquitto: exit 0
+    # Subtest: HTTP remains available while the real broker is stopped
+    ok 5 - HTTP remains available while the real broker is stopped
+      ---
+      duration_ms: 1865.3917
+      type: 'test'
+      ...
+# [MQTT] Reconnecting
+# [MQTT] Connected
+# [MQTT] Subscribed fallguard/v1/devices/+/+ (QoS 1)
+# [MQTT] Message fallguard/v1/devices/esp32_001/telemetry {
+#   device_id: 'esp32_001',
+#   source: 'simulator',
+#   sample_id: 'sp1be01-1793205130720-after-restart',
+#   svm: 1.02
+# }
+# [Evidence] Same client; 1 message listener; 2 SUBACKs across 2 connections; new sample handled once
+# [App] Shutting down HTTP and MQTT
+    # Subtest: broker restart restores one subscription and one delivery per sample
+    ok 6 - broker restart restores one subscription and one delivery per sample
+      ---
+      duration_ms: 1544.46
+      type: 'test'
+      ...
+# [MQTT] Connection closed
+# [MQTT] Client stopped
+# [App] HTTP and MQTT stopped
+# [Evidence] HTTP port closed; real MQTT client disconnected
+    # Subtest: application shutdown releases HTTP and MQTT resources
+    ok 7 - application shutdown releases HTTP and MQTT resources
+      ---
+      duration_ms: 22.7111
+      type: 'test'
+      ...
+    1..7
+ok 1 - real Mosquitto local acceptance (no mocks)
+  ---
+  duration_ms: 5195.7718
+  type: 'test'
+  ...
+1..1
+# tests 8
+# suites 0
+# pass 8
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 5469.2529

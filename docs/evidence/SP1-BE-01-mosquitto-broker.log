@@ -1,0 +1,30 @@
+Real broker log excerpts. Docker gateway addresses/ports redacted; client IDs retained for restart correlation.
+mosquitto-1  | 1793205011: mosquitto version 2.1.2 starting
+mosquitto-1  | 1793205011: Warning: File /mosquitto/config/passwd has world readable permissions. Future versions will refuse to load this file.
+mosquitto-1  | 1793205011: Warning: File /mosquitto/config/passwd owner is not mosquitto. Future versions will refuse to load this file.To fix this, use `chown mosquitto /mosquitto/config/passwd`.
+mosquitto-1  | 1793205011: Warning: File /mosquitto/config/passwd group is not mosquitto. Future versions will refuse to load this file.
+mosquitto-1  | 1793205011: Warning: File /mosquitto/config/acl.conf has world readable permissions. Future versions will refuse to load this file.
+mosquitto-1  | 1793205011: Warning: File /mosquitto/config/acl.conf owner is not mosquitto. Future versions will refuse to load this file.To fix this, use `chown mosquitto /mosquitto/config/acl.conf`.
+mosquitto-1  | 1793205011: Warning: File /mosquitto/config/acl.conf group is not mosquitto. Future versions will refuse to load this file.
+mosquitto-1  | 1793205011: mosquitto version 2.1.2 running
+mosquitto-1  | 1793205130: New client connected from <docker-gateway>:<port> as mqttjs_c528aedb (p4, c1, k60, u'fallguard_backend').
+mosquitto-1  | 1793205130: New client connected from <docker-gateway>:<port> as mqttjs_d9d1a606 (p4, c1, k60, u'fallguard_backend').
+mosquitto-1  | 1793205130: New client connected from <docker-gateway>:<port> as mqttjs_a8c5849d (p4, c1, k60, u'esp32_001').
+mosquitto-1  | 1793205130: New client connected from <docker-gateway>:<port> as mqttjs_1c021381 (p4, c1, k60, u'esp32_002').
+mosquitto-1  | 1793205133: mosquitto version 2.1.2 terminating
+mosquitto-1  | 1793205135: mosquitto version 2.1.2 starting
+mosquitto-1  | 1793205135: Warning: File /mosquitto/config/passwd has world readable permissions. Future versions will refuse to load this file.
+mosquitto-1  | 1793205135: Warning: File /mosquitto/config/passwd owner is not mosquitto. Future versions will refuse to load this file.To fix this, use `chown mosquitto /mosquitto/config/passwd`.
+mosquitto-1  | 1793205135: Warning: File /mosquitto/config/passwd group is not mosquitto. Future versions will refuse to load this file.
+mosquitto-1  | 1793205135: Warning: File /mosquitto/config/acl.conf has world readable permissions. Future versions will refuse to load this file.
+mosquitto-1  | 1793205135: Warning: File /mosquitto/config/acl.conf owner is not mosquitto. Future versions will refuse to load this file.To fix this, use `chown mosquitto /mosquitto/config/acl.conf`.
+mosquitto-1  | 1793205135: Warning: File /mosquitto/config/acl.conf group is not mosquitto. Future versions will refuse to load this file.
+mosquitto-1  | 1793205135: mosquitto version 2.1.2 running
+mosquitto-1  | 1793205135: New client connected from <docker-gateway>:<port> as mqttjs_c528aedb (p4, c1, k60, u'fallguard_backend').
+mosquitto-1  | 1793205135: New client connected from <docker-gateway>:<port> as mqttjs_0a58792d (p4, c1, k60, u'esp32_001').
+mosquitto-1  | 1793205135: Client mqttjs_c528aedb [<docker-gateway>:<port>] disconnected: connection closed by client.
+mosquitto-1  | 1793205135: Client mqttjs_0a58792d [<docker-gateway>:<port>] disconnected: connection closed by client.
+mosquitto-1  | 1793205148: New client connected from <docker-gateway>:<port> as mqttjs_ac4a9f70 (p4, c1, k60, u'fallguard_backend').
+mosquitto-1  | 1793205191: New client connected from <docker-gateway>:<port> as mqttjs_b4a084ed (p4, c1, k60, u'esp32_001').
+mosquitto-1  | 1793205191: Client mqttjs_b4a084ed [<docker-gateway>:<port>] disconnected.
+mosquitto-1  | 1793205194: Client mqttjs_ac4a9f70 [<docker-gateway>:<port>] disconnected: connection closed by client.

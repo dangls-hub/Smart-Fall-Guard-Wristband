@@ -1,0 +1,25 @@
+Manual terminal acceptance, 2026-10-28 (Asia/Saigon).
+Runtime: Node.js 22.23.4, direct backend/server.js in a Windows PTY.
+Observed application output:
+[MQTT] Connecting (mqtt, port 1883)
+Smart Fall-Guard backend running at http://127.0.0.1:5000
+[MQTT] Connected
+[MQTT] Subscribed fallguard/v1/devices/+/+ (QoS 1)
+[MQTT] Message fallguard/v1/devices/esp32_001/telemetry {
+  device_id: 'esp32_001',
+  source: 'simulator',
+  sample_id: 'sp1be01-terminal-before-ctrlc',
+  svm: 1.02
+}
+HTTP probe before Ctrl+C: 404
+Input: actual terminal Ctrl+C (ETX), not IPC/process.emit.
+[App] Shutting down HTTP and MQTT
+[MQTT] Connection closed
+[MQTT] Client stopped
+[App] HTTP and MQTT stopped
+Terminal/PowerShell wrapper exit code: 1 after Ctrl+C; separate Node exit code not captured.
+Independent probe after Ctrl+C:
+After Ctrl+C: HTTP 127.0.0.1:5000 ECONNREFUSED (port released)
+Process inspection: no node.exe running backend/server.js remained.
+Broker disconnect evidence is in SP1-BE-01-mosquitto-broker.log.
+This file records observations from the terminal tool/probes; it is not an automated signal test.
