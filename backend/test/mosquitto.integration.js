@@ -111,7 +111,7 @@ test('real Mosquitto local acceptance (no mocks)', { timeout: 45000 }, async t =
         await until(() => subscriptions() === 1, 'backend SUBACK');
         assert.equal(mqttClient.connected, true);
         assert.equal(mqttClient.listenerCount('message'), 1);
-        assert.equal(await get(port), 404); // No SP1-BE-02 endpoint.
+        assert.equal(await get(port), 501); // SP1-BE-02 route exists; business query is not implemented.
         observer = await connectClient(base, 'backend observer', clients);
         observer.on('message', (messageTopic, payload) => {
             try { observed.push({ topic: messageTopic, data: JSON.parse(payload.toString()) }); } catch {}
@@ -141,7 +141,7 @@ test('real Mosquitto local acceptance (no mocks)', { timeout: 45000 }, async t =
         const sample = data(id1, 'after-invalid');
         await publish(device1, topic(id1), sample);
         await until(() => received(sample.sample_id).length === 1, 'delivery after invalid JSON');
-        assert.equal(await get(port), 404);
+        assert.equal(await get(port), 501);
     });
 
     await t.test('ACL blocks cross-device publish, with positive subscriber controls', async () => {
@@ -164,10 +164,10 @@ test('real Mosquitto local acceptance (no mocks)', { timeout: 45000 }, async t =
         compose('stop', '-t', '3', 'mosquitto');
         stopped = true;
         await until(() => !mqttClient.connected, 'broker disconnect');
-        assert.equal(await get(port), 404);
+        assert.equal(await get(port), 501);
         await until(() => records.some(record => record.args[0].includes('Reconnecting')), 'retry while broker is stopped');
-        assert.equal(await get(port), 404);
-        console.log('[Evidence] Broker stopped: HTTP 404 twice; backend retry observed');
+        assert.equal(await get(port), 501);
+        console.log('[Evidence] Broker stopped: HTTP 501 twice; backend retry observed');
     });
 
     await t.test('broker restart restores one subscription and one delivery per sample', async () => {
@@ -184,7 +184,7 @@ test('real Mosquitto local acceptance (no mocks)', { timeout: 45000 }, async t =
         await pause(500);
         assert.equal(received(sample.sample_id).length, 1);
         assert.equal(subscriptions(), 2);
-        assert.equal(await get(port), 404);
+        assert.equal(await get(port), 501);
         console.log('[Evidence] Same client; 1 message listener; 2 SUBACKs across 2 connections; new sample handled once');
     });
 
