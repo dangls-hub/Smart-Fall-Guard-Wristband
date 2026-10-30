@@ -23,7 +23,7 @@ flowchart LR
 - Chỉ xóa sự kiện offline sau ACK của backend xác nhận đã commit CSDL. QoS 1 có thể phát trùng; cần chống trùng theo event_id.
 - Mất Wi-Fi/broker: cảnh báo từ xa bị trì hoãn đến khi nối lại; buffer chỉ bảo toàn lịch sử trong giới hạn dung lượng và nguồn điện.
 
-Xem [quyết định kiến trúc và thứ tự triển khai](docs/ARCHITECTURE_REVIEW.md), [đặc tả MQTT](docs/MQTT_TOPICS_SPEC.md) và [API dự kiến](docs/API_DOCUMENTATION.md).
+Xem [quyết định kiến trúc và thứ tự triển khai](docs/ARCHITECTURE_REVIEW.md), [đặc tả MQTT](docs/MQTT_TOPICS_SPEC.md) và [API: khung hiện tại và kế hoạch](docs/API_DOCUMENTATION.md).
 
 ## 2. Thuật toán phát hiện ngã dự kiến
 
@@ -126,6 +126,8 @@ Pop-Location
 Backend subscribe `fallguard/v1/devices/+/+` và log topic cùng JSON đã parse; JSON lỗi được bỏ qua. Broker tạm ngừng không làm HTTP ngừng phục vụ. Backend yêu cầu đủ MQTT_HOST/PORT/PROTOCOL/USERNAME/PASSWORD; cấu hình sai báo lỗi trước khi mở HTTP. Với `mqtts`, MQTT_CA_PATH bắt buộc, đường dẫn tương đối tính từ gốc repo và chứng chỉ vẫn được xác minh. Ctrl+C/SIGTERM đóng HTTP và MQTT, tối đa 5 giây rồi buộc thoát nếu bị kẹt.
 
 Chạy `npm test` trong `backend` với Node.js 22. Xem [kiểm chứng SP1-BE-01 và cách publish mẫu](docs/VALIDATION.md#sp1-be-01--28102026). API nghiệp vụ và luồng lưu dữ liệu/ACK/cảnh báo chưa được triển khai. Trang React và sketch hiện tại cũng chưa tạo chức năng phát hiện ngã.
+
+SP1-BE-02 có hai khung route `GET /api/devices` và `GET /api/events`: trả HTTP **501** với JSON `error.code = NOT_IMPLEMENTED`, không truy vấn CSDL hoặc trả dữ liệu giả. Query/filter chưa hỗ trợ; đường dẫn chưa khai báo vẫn trả 404. Xem [hợp đồng API và ví dụ gọi](docs/API_DOCUMENTATION.md) và [kiểm chứng BE-02](docs/VALIDATION.md#sp1-be-02--30102026). Việc có khung route chưa phải hoàn thành nghiệp vụ API hoặc toàn bộ Spiral 1.
 
 Đã có bài nghiệm thu riêng `npm run test:mosquitto` dùng broker thật, không mock. Bài này **dừng/khởi động lại service Mosquitto local**; chỉ chạy với broker thử nghiệm ở `127.0.0.1`, đủ hai tài khoản thiết bị thật theo `.env.example`. Xem [kết quả và cách chạy nghiệm thu MQTT local](docs/VALIDATION.md#nghiệm-thu-mosquitto-thật-local--28102026).
 
