@@ -97,13 +97,13 @@ test('real Express/MQTT.js with unavailable broker: HTTP/CORS, retries, SIGINT c
     const port = unused.address().port;
     await new Promise(resolve => unused.close(resolve));
     const state = await childServer(t, port);
-    assert.equal((await request(state.port)).statusCode, 404);
+    assert.equal((await request(state.port)).statusCode, 501);
     const preflight = await request(state.port, 'OPTIONS');
     assert.equal(preflight.statusCode, 204);
     assert.equal(preflight.headers['access-control-allow-origin'], 'http://test.local');
     await until(() => state.output.includes('Reconnecting'));
     assert.ok(state.output.includes('ECONNREFUSED'));
-    assert.equal((await request(state.port)).statusCode, 404);
+    assert.equal((await request(state.port)).statusCode, 501);
     state.child.send('SIGINT');
     await until(() => state.exit);
     assert.equal(state.exit.code, 0);
@@ -121,7 +121,7 @@ test('protocol mock: subscribe, valid/invalid JSON, real reconnect, SIGTERM rele
     peer.publish('{"sample":"after-invalid"}');
     await until(() => state.output.includes('after-invalid'));
     assert.ok(state.output.includes('Invalid JSON'));
-    assert.equal((await request(state.port)).statusCode, 404);
+    assert.equal((await request(state.port)).statusCode, 501);
     peer.socket.destroy();
     await until(() => peer.connects === 2 && peer.subscriptions.length === 2);
     peer.publish('{"sample":"after-reconnect"}');
