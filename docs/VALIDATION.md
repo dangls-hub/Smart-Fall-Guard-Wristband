@@ -177,3 +177,28 @@ Pop-Location
 ```
 
 Bài test dừng backend và client kiểm thử khi kết thúc, còn Mosquitto được để chạy lại. Ca Ctrl+C thật được kiểm tra riêng trong terminal theo mô tả trên; script tích hợp tự động gọi `shutdown()`, không mô phỏng Ctrl+C.
+
+## SP1-BE-02 — 30/10/2026
+
+Base sau fetch: `add6efc1a3ac3bad921af0bae8b6af397abb8015` (`origin/main`), khớp snapshot đã review. PR #4 đã merge trước task này. Working tree ban đầu sạch, chưa có staged/untracked changes. Không tìm thấy AGENTS.md, CONTRIBUTING hoặc PR template; README chỉ phân công nhánh chuyên trách, không bắt buộc duy nhất một nhánh. Theo yêu cầu task, dùng nhánh riêng `feat/sp1-be02-api-scaffold` từ origin/main.
+
+Đã khai báo hai GET route `/api/devices` và `/api/events`, chuyển tới handler tương ứng trong controller hiện có. Mỗi handler trả **501**, `application/json; charset=utf-8`, với duy nhất envelope `error` gồm `code: NOT_IMPLEMENTED` và thông báo riêng cho endpoint. Không đọc CSDL, không trả dữ liệu giả hoặc danh sách rỗng như thể đã query. Query/filter không được áp dụng; request có query vẫn trả cùng 501. Route không tồn tại vẫn 404.
+
+Đã chạy **toàn bộ `npm test` bằng Node.js 22.23.4: 17/17 pass, 0 fail, 0 skip**. Máy mặc định Node 24; lượt này đưa thư mục binary Node 22 lên đầu PATH và chạy npm CLI bằng binary Node 22 để cả npm và lifecycle script `node --test test/*.test.js` đều dùng đúng phiên bản:
+
+```powershell
+# Trong backend; $node22 trỏ tới binary Node 22 có sẵn trên máy.
+$env:Path = (Split-Path -Parent $node22) + ';' + $env:Path
+node --version
+& $node22 'C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js' test
+# Khi Node 22 đã là phiên bản mặc định trên PATH, chỉ cần: npm test
+```
+
+- 4 test HTTP mới trong `backend/test/api.test.js`: hai endpoint trả status/Content-Type/JSON đúng hợp đồng, query chưa hỗ trợ vẫn 501, đường dẫn không tồn tại trả 404. Test mount router vào Express độc lập và gọi TCP loopback thật, không import server/MQTT/database, không cần broker hay PostgreSQL.
+- 13 test BE-01 vẫn pass: cấu hình MQTT, JSON/SUBACK, client/listener, reconnect, HTTP/CORS khi broker không sẵn sàng, shutdown và cổng HTTP bị chiếm. Chỉ cập nhật kỳ vọng HTTP liveness của `/api/devices` từ 404 sang 501, giữ các phép kiểm tra lifecycle.
+- `backend/test/mosquitto.integration.js` cũng đổi kỳ vọng và thông báo liveness 404 → 501 để khớp API hiện tại; **chưa chạy lại Mosquitto integration trong lượt BE-02**. Không tự stop/start broker hoặc chạy PostgreSQL. Kết quả/log ngày 28/10 ở trên và trong `docs/evidence/` được giữ nguyên, không sửa thành kết quả mới; HTTP 404 trong các log đó là hành vi lịch sử trước BE-02.
+- Giữ nguyên server.js, mqttService.js, CORS, .env, HOST/PORT, shutdown và dependencies/lockfile. Không mở endpoint telemetry/resolve/commands, không sửa schema/helper, ingest, ACK/dedup, Socket.io, webhook, heartbeat, frontend, firmware hoặc TLS.
+
+Tài liệu `API_DOCUMENTATION.md` tách response 501 hiện tại, route chưa tồn tại 404 và ví dụ 200 **dự kiến ở Spiral 2**; ví dụ dùng các cột schema nền hiện có, ghi rõ migration event_id/timezone còn cần phối hợp. Các yêu cầu xác thực/phân quyền trước mở API ra ngoài được giữ.
+
+Triển khai và test đã có bằng chứng như trên; **được reviewer chấp nhận: chờ review**. Không tự tick nghiệm thu reviewer hoặc đánh dấu toàn bộ Spiral 1 hoàn thành. Xem báo cáo bàn giao ngoài repo để đối chiếu BE02-1 đến BE02-7, commit và Draft PR.
