@@ -2,7 +2,7 @@
 
 Dự án Bài tập lớn IoT — Nhóm 4, GEHIHI. Kế hoạch triển khai: 01/11–30/11/2026.
 
-> **Trạng thái: chưa có bản chạy đầu-cuối.** SP1-BE-01 đã có Express + MQTT transport: kết nối/reconnect, subscribe và log JSON, dừng có thời hạn. Đã kiểm chứng MQTT local với Mosquitto thật; TLS chưa thử handshake thật. Firmware chưa đọc cảm biến/chạy FSM; CSDL, Socket.io, webhook và dashboard còn là khung. Các tính năng dưới đây là thiết kế mục tiêu. Chưa có kết quả đo độ chính xác, độ trễ hoặc thời lượng pin.
+> **Trạng thái: chưa có bản chạy đầu-cuối.** SP1-BE-01 đã có Express + MQTT transport: kết nối/reconnect, subscribe và log JSON, dừng có thời hạn. Đã kiểm chứng MQTT local với Mosquitto thật; TLS chưa thử handshake thật. SP1-INF-02 đã có PostgreSQL helper và kiểm chứng kết nối/schema local; chưa tích hợp lưu MQTT vào CSDL. Firmware chưa đọc cảm biến/chạy FSM; Socket.io, webhook và dashboard còn là khung. Các tính năng dưới đây là thiết kế mục tiêu. Chưa có kết quả đo độ chính xác, độ trễ hoặc thời lượng pin.
 
 ## 1. Kiến trúc mục tiêu
 
@@ -109,6 +109,8 @@ docker compose up -d
 Mật khẩu fallguard_backend phải khớp MQTT_PASSWORD trong .env. Tạo tài khoản riêng cho mỗi thiết bị, username bằng device_id; dành riêng username fallguard_backend cho server.
 
 Cấu hình mặc định chỉ xuất MQTT 1883 và PostgreSQL 5432 lên **127.0.0.1**. MQTT có mật khẩu/ACL nhưng chưa mã hóa ở chế độ local. Dữ liệu broker/CSDL dùng named volumes; schema chỉ tự khởi tạo khi PostgreSQL có data directory rỗng. Với volume đã có dữ liệu, cần migration riêng; không xóa volume để cập nhật schema.
+
+Kiểm tra PostgreSQL riêng (không cần khởi động broker): chạy `docker compose up -d postgres`, sau đó trong `backend` chạy `npm run check:db` để xác nhận kết nối và đủ 4 bảng. `npm run test:postgres` kiểm thử PostgreSQL thật bằng cấu hình `.env`; đọc schema, thử query có tham số, sai mật khẩu và lỗi kết nối, không sửa dữ liệu bền vững. Xem [bằng chứng SP1-INF-02](docs/VALIDATION.md#sp1-inf-02--04112026) và [cách dùng helper](docs/DATABASE.md).
 
 ```powershell
 Push-Location backend

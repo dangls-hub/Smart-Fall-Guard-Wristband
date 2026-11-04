@@ -202,3 +202,23 @@ node --version
 Tài liệu `API_DOCUMENTATION.md` tách response 501 hiện tại, route chưa tồn tại 404 và ví dụ 200 **dự kiến ở Spiral 2**; ví dụ dùng các cột schema nền hiện có, ghi rõ migration event_id/timezone còn cần phối hợp. Các yêu cầu xác thực/phân quyền trước mở API ra ngoài được giữ.
 
 Triển khai và test đã có bằng chứng như trên; **được reviewer chấp nhận: chờ review**. Không tự tick nghiệm thu reviewer hoặc đánh dấu toàn bộ Spiral 1 hoàn thành. Xem báo cáo bàn giao ngoài repo để đối chiếu BE02-1 đến BE02-7, commit và Draft PR.
+
+
+## SP1-INF-02 — 04/11/2026
+
+Base: `2f47f2f` trên `chore/swap-nam-tien-assignments`. Ban đầu chỉ có `backend/check-db.js` chưa được Git theo dõi. Hoàn thiện `database/db_helper.js`, chuyển script kiểm tra sang helper, thêm test và tài liệu; không đổi dependencies, lockfile, schema SQL hoặc API nghiệp vụ.
+
+Môi trường: Linux, Node.js **22.22.1**, PostgreSQL image `postgres:17-alpine`, database `fallguard_db`, role `fallguard`, TCP `127.0.0.1:5432`. Credentials đọc từ `.env` local, không ghi mật khẩu vào repo/log. PostgreSQL đã chạy sẵn trên volume hiện có.
+
+Đã chạy thực tế:
+
+- RED: `node --test test/dbHelper.test.js` thất bại 3/3 vì helper chưa có `createDatabase`; sau triển khai đạt 3/3.
+- `npm test` trong `backend`: **20/20 pass**, 0 fail/skip (17 test cũ và 3 test helper).
+- `node --test test/postgres.integration.js` (tương đương `npm run test:postgres`): **3/3 pass**, 0 fail/skip. PostgreSQL thật trả đủ 4 bảng nền; query có tham số giữ nguyên chuỗi chứa ký tự SQL; lỗi SQL `22012` không ngăn query tiếp theo; đóng pool nhiều lần thành công và query sau đóng bị từ chối. Sai mật khẩu ngẫu nhiên trả `28P01`. Peer TCP local ngắt trước handshake làm query reject và helper vẫn đóng được.
+- `node backend/check-db.js` (tương đương `npm run check:db` trong backend): exit 0, đúng database/role và `Schema OK: devices, telemetry_logs, fall_events, command_logs`.
+- Thử tạm bỏ chặn cổng 0: test invalid port thất bại đúng dự kiến; đã khôi phục điều kiện hợp lệ 1–65535.
+- `git diff --check` và đối chiếu hai thư mục Spiral: đạt.
+
+Sandbox ban đầu chặn stream của Node test runner; các kết quả test ở trên được chạy ngoài sandbox theo phê duyệt. Các test PostgreSQL chỉ đọc/truy vấn biểu thức, không sửa schema hoặc dữ liệu bền vững, không restart service.
+
+Giới hạn: chưa thử init schema trên volume mới hoặc giữ dữ liệu qua restart; chưa thử ngắt kết nối sau khi session PostgreSQL đã thiết lập, lỗi idle hoặc timeout khi server không phản hồi. Chưa có transaction API, MQTT ingest, ACK/dedup, TLS hoặc heartbeat. Không đánh dấu toàn bộ Spiral 1 hoàn thành hay nghiệm thu thay reviewer. Hướng dẫn và hợp đồng helper tại [DATABASE.md](DATABASE.md).

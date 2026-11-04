@@ -1,12 +1,12 @@
-# Báo cáo hạ tầng — CHƯA KIỂM THỬ RUNTIME
+# Báo cáo hạ tầng — ĐÃ KIỂM THỬ MỘT PHẦN
 
 Người phụ trách: Trần Đình Nam. Ghi commit, ngày, máy chủ, phiên bản Docker/Mosquitto/PostgreSQL, cấu hình mạng và đường dẫn log.
 
 | Ca thử | Điều kiện đạt | Kết quả |
 |---|---|---|
-| Auth/ACL | Anonymous/sai mật khẩu bị từ chối; thiết bị không truy cập chéo | Chưa thử |
+| Auth/ACL | Anonymous/sai mật khẩu bị từ chối; thiết bị không truy cập chéo | MQTT local đã thử tài khoản hợp lệ và chặn publish chéo telemetry ngày 28/10; chưa đủ ma trận quyền. Xem VALIDATION.md |
 | TLS | CA và SAN đúng thành công; sai CA/SAN bị từ chối | Chưa thử |
-| PostgreSQL init | Schema được tạo trên data directory rỗng, restart giữ dữ liệu | Chưa thử |
+| PostgreSQL init | Schema được tạo trên data directory rỗng, restart giữ dữ liệu | 04/11: xác nhận kết nối thật và đủ 4 bảng trên volume hiện có; sai mật khẩu bị từ chối. Chưa thử init trên volume mới hoặc giữ dữ liệu qua restart |
 | 50 kết nối | Ghi CPU/RAM, throughput, lỗi và latency | Chưa thử |
 | Offline 10 sự kiện | Đủ 10 bản ghi duy nhất sau reconnect, ACK sau commit | Chưa thử |
 | Mất ACK/restart | Retry cùng event_id không nhân bản sự kiện/webhook | Chưa thử |
@@ -17,3 +17,5 @@ Người phụ trách: Trần Đình Nam. Ghi commit, ngày, máy chủ, phiên 
 Thời gian mạng mất không có cảnh báo từ xa qua Wi-Fi. Phân biệt thời điểm ngã và thời điểm đồng bộ; không ghi đồng bộ bù là cảnh báo thời gian thực thành công.
 
 Kiểm tra Compose tĩnh không thay thế các ca thử trong bảng.
+
+Bằng chứng SP1-INF-02 ngày 04/11/2026: xem [VALIDATION.md](VALIDATION.md#sp1-inf-02--04112026). Bộ test PostgreSQL đọc schema và kiểm tra helper, không restart CSDL hoặc sửa dữ liệu bền vững.
