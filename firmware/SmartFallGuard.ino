@@ -1,4 +1,4 @@
-// [SP2-HW-02, SP3-HW-02, SP4-HW-01] Phụ trách: Trần Đình Nam
+// [SP2-HW-02, SP3-HW-02, SP4-HW-01] Phụ trách: Phạm Việt Tiến
 // Chương trình chính trên ESP32: Đọc MPU6050 50Hz, chạy FSM, quản lý Buzzer/Button, MQTT & Downlink Commands
 #include "mpu6050_driver.h"
 #include "fall_detection.h"

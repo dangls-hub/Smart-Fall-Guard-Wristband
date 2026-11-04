@@ -28,7 +28,7 @@
 
 ## 3. PHÂN CÔNG NHIỆM VỤ CHI TIẾT THEO THÀNH VIÊN
 
-### 🛠️ 1. Trần Đình Nam – Embedded & Firmware Lead
+### 🛠️ 1. Phạm Việt Tiến – Embedded & Firmware Lead
 * **Task ID: SP3-HW-01**
   * **Nhiệm vụ:** Lập trình Bộ đệm ngoại tuyến bằng bộ nhớ Flash SPIFFS (Offline Data Buffer).
   * **Các bước thực hiện:**
@@ -50,7 +50,7 @@
 
 ---
 
-### ☁️ 2. Phạm Việt Tiến – IoT Infrastructure & Cloud Lead
+### ☁️ 2. Trần Đình Nam – IoT Infrastructure & Cloud Lead
 * **Task ID: SP3-INF-01**
   * **Nhiệm vụ:** Cấu hình MQTT Last Will and Testament (LWT) & Tối ưu hóa Topic Downlink.
   * **Các bước thực hiện:**

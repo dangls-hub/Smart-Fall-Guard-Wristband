@@ -1,4 +1,4 @@
--- [SP1-INF-02 & SP3-INF-01] Phụ trách: Phạm Việt Tiến
+-- [SP1-INF-02 & SP3-INF-01] Phụ trách: Trần Đình Nam
 -- Lược đồ CSDL: devices, telemetry_logs, fall_events (kèm cột is_synced), command_logs
 
 CREATE TABLE IF NOT EXISTS devices (

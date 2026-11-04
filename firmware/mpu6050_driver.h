@@ -1,4 +1,4 @@
-// [SP2-HW-01] Phụ trách: Trần Đình Nam
+// [SP2-HW-01] Phụ trách: Phạm Việt Tiến
 // Header driver đọc MPU6050 ở tần số 50Hz (20ms), tính SVM và góc nghiêng Pitch
 #ifndef MPU6050_DRIVER_H
 #define MPU6050_DRIVER_H

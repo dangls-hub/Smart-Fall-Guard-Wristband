@@ -22,13 +22,13 @@
 |---|:---:|---|
 | MPU6050 bị nhiễu dây cáp I2C hoặc sai lệch địa chỉ I2C ($0x68$ vs $0x69$). | Trung bình | Kiểm tra chân AD0 (nối GND để cố định $0x68$). Viết script I2C Scanner trên ESP32 để phát hiện đúng địa chỉ trước khi code driver. |
 | Xung đột phiên bản Node.js / thư viện MQTT khi chạy trên các máy khác nhau. | Thấp | Cung cấp file `docker-compose.yml` và chuẩn hóa phiên bản Node.js 22, file `.env.example`. |
-| Chưa có thiết bị phần cứng thật để nhóm làm Frontend và Backend kiểm thử. | Cao | Tiến và Đăng thống nhất tạo payload JSON mẫu và mock dữ liệu ngay từ đầu tuần 1. |
+| Chưa có thiết bị phần cứng thật để nhóm làm Frontend và Backend kiểm thử. | Cao | Nam và Đăng thống nhất tạo payload JSON mẫu và mock dữ liệu ngay từ đầu tuần 1. |
 
 ---
 
 ## 3. PHÂN CÔNG NHIỆM VỤ CHI TIẾT THEO THÀNH VIÊN
 
-### 🛠️ 1. Trần Đình Nam – Embedded & Firmware Lead
+### 🛠️ 1. Phạm Việt Tiến – Embedded & Firmware Lead
 * **Task ID: SP1-HW-01**
   * **Trạng thái:** Hoàn thành thiết kế Rev B và file bàn giao; kiểm tra điện áp/dòng/cách ly trên phần cứng chờ khi có linh kiện.
   * **Nhiệm vụ:** Thiết kế Sơ đồ nguyên lý mạch điện phần cứng (Hardware Schematic).
@@ -51,7 +51,7 @@
 
 ---
 
-### ☁️ 2. Phạm Việt Tiến – IoT Infrastructure & Cloud Lead
+### ☁️ 2. Trần Đình Nam – IoT Infrastructure & Cloud Lead
 * **Task ID: SP1-INF-01**
   * **Nhiệm vụ:** Khởi tạo MQTT Broker Mosquitto và file cấu hình Docker Compose.
   * **Các bước thực hiện:**
