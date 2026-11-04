@@ -84,7 +84,7 @@ Các trường tương ứng bảng `devices` trong `database/schema.sql`; statu
 
 `id` ở ví dụ là khóa `SERIAL` của `fall_events`, không phải MQTT `event_id`. `pitch_angle` là tên cột schema hiện tại, chưa có mapping từ payload MQTT `pitch`. Các chuỗi thời gian UTC chỉ minh họa định dạng API dự kiến; các cột SQL hiện là `TIMESTAMP`, chưa có cơ chế chuẩn hóa timezone trong helper.
 
-Theo `ARCHITECTURE_REVIEW.md` và `MQTT_TOPICS_SPEC.md`, ingest sau này cần `event_id`, `UNIQUE(device_id,event_id)`, thời điểm xảy ra/nhận và ACK sau commit. Những trường/migration đó **chưa có trong schema nền**, phải phối hợp Tiến ở task tương ứng trước khi hứa dedup/ACK hoặc truy vấn dữ liệu đó. BE-02 không sửa schema/helper và không triển khai persistence.
+Theo `ARCHITECTURE_REVIEW.md` và `MQTT_TOPICS_SPEC.md`, ingest sau này cần `event_id`, `UNIQUE(device_id,event_id)`, thời điểm xảy ra/nhận và ACK sau commit. Những trường/migration đó **chưa có trong schema nền**, phải phối hợp Nam ở task tương ứng trước khi hứa dedup/ACK hoặc truy vấn dữ liệu đó. BE-02 không sửa schema/helper và không triển khai persistence.
 
 ## Các endpoint Spiral sau — dự kiến, chưa khai báo
 

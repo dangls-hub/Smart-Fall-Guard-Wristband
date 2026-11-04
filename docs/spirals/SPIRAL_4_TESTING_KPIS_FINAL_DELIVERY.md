@@ -47,7 +47,7 @@ Kiểm tra khả năng phân biệt và chống báo giả của thuật toán:
 
 ## 3. PHÂN CÔNG NHIỆM VỤ CHI TIẾT THEO THÀNH VIÊN
 
-### 🛠️ 1. Trần Đình Nam – Embedded & Firmware Lead
+### 🛠️ 1. Phạm Việt Tiến – Embedded & Firmware Lead
 * **Task ID: SP4-HW-01**
   * **Nhiệm vụ:** Thực hiện kiểm thử phần cứng, đo đạc dòng điện và tối ưu thời lượng Pin.
   * **Các bước thực hiện:**
@@ -69,7 +69,7 @@ Kiểm tra khả năng phân biệt và chống báo giả của thuật toán:
 
 ---
 
-### ☁️ 2. Phạm Việt Tiến – IoT Infrastructure Lead
+### ☁️ 2. Trần Đình Nam – IoT Infrastructure Lead
 * **Task ID: SP4-INF-01**
   * **Nhiệm vụ:** Kiểm thử tải, đo thời gian ngắt kết nối Heartbeat & Khắc phục sự cố mạng.
   * **Các bước thực hiện:**

@@ -1,6 +1,6 @@
 # Báo cáo hạ tầng — CHƯA KIỂM THỬ RUNTIME
 
-Người phụ trách: Phạm Việt Tiến. Ghi commit, ngày, máy chủ, phiên bản Docker/Mosquitto/PostgreSQL, cấu hình mạng và đường dẫn log.
+Người phụ trách: Trần Đình Nam. Ghi commit, ngày, máy chủ, phiên bản Docker/Mosquitto/PostgreSQL, cấu hình mạng và đường dẫn log.
 
 | Ca thử | Điều kiện đạt | Kết quả |
 |---|---|---|

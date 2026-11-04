@@ -1,6 +1,6 @@
 # Báo cáo pin — CHƯA ĐO
 
-Người phụ trách: Trần Đình Nam. Mục tiêu mong muốn ≥24 giờ; chưa chốt dung lượng để bảo đảm mục tiêu.
+Người phụ trách: Phạm Việt Tiến. Mục tiêu mong muốn ≥24 giờ; chưa chốt dung lượng để bảo đảm mục tiêu.
 
 Ghi: ngày thử, commit firmware, mã bo/IMU/charger/converter, pin và dung lượng danh định, điện áp cắt, chu kỳ telemetry, mức Wi-Fi, chế độ sleep, số lần còi và nhiệt độ môi trường.
 

@@ -137,8 +137,8 @@ Khi gắn ESP32 qua LAN, dùng [hướng dẫn TLS](docs/DEPLOYMENT.md) và Comp
 
 | Thành viên | Phụ trách | Nhánh chuyên trách |
 |---|---|---|
-| Trần Đình Nam | Firmware, cảm biến, nguồn và phép đo pin | feat/firmware-esp32 |
-| Phạm Việt Tiến | Broker, PostgreSQL, TLS và kiểm thử hạ tầng | feat/iot-infra-broker |
+| Phạm Việt Tiến | Firmware, cảm biến, nguồn và phép đo pin | feat/firmware-esp32 |
+| Trần Đình Nam | Broker, PostgreSQL, TLS và kiểm thử hạ tầng | feat/iot-infra-broker |
 | Nguyễn Hữu Chính | Backend, API, Socket.io và webhook | feat/backend-server |
 | Đỗ Hải Đăng | Dashboard, simulator và tổng hợp kết quả thử | feat/frontend-dashboard |
 

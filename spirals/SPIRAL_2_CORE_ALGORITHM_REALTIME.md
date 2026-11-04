@@ -28,7 +28,7 @@
 
 ## 3. PHÂN CÔNG NHIỆM VỤ CHI TIẾT THEO THÀNH VIÊN
 
-### 🛠️ 1. Trần Đình Nam – Embedded & Firmware Lead
+### 🛠️ 1. Phạm Việt Tiến – Embedded & Firmware Lead
 * **Task ID: SP2-HW-01**
   * **Nhiệm vụ:** Viết Driver đọc MPU6050 tần số 50Hz và tính toán thông số vector chuyển động.
   * **Các bước thực hiện:**
@@ -52,7 +52,7 @@
 
 ---
 
-### ☁️ 2. Phạm Việt Tiến – IoT Infrastructure & Cloud Lead
+### ☁️ 2. Trần Đình Nam – IoT Infrastructure & Cloud Lead
 * **Task ID: SP2-INF-01**
   * **Nhiệm vụ:** Cấu hình bảo mật MQTT Broker qua TLS/SSL (Port 8883) & Quản lý User/Password.
   * **Các bước thực hiện:**
