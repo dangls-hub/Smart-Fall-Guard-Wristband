@@ -62,6 +62,7 @@
   * **Thời gian:** 01/11/2026 – 03/11/2026 (10 giờ làm việc).
 
 * **Task ID: SP1-INF-02**
+  * **Trạng thái:** Đã triển khai schema, đặc tả MQTT và helper; kết nối/query/schema PostgreSQL local đã kiểm chứng ngày 04/11/2026. Xem `docs/VALIDATION.md`; chưa kiểm chứng init trên volume mới hoặc giữ dữ liệu qua restart, chưa đánh dấu nghiệm thu toàn Spiral 1.
   * **Nhiệm vụ:** Thiết kế Lược đồ Cơ sở dữ liệu và Cây Topic MQTT.
   * **Các bước thực hiện:**
     1. Soạn thảo tài liệu đặc tả cấu trúc Topic:
