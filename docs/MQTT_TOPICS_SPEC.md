@@ -2,6 +2,8 @@
 
 SP1-BE-01 đã triển khai transport backend: subscribe `fallguard/v1/devices/+/+`, log topic/JSON và bỏ qua JSON lỗi. Chưa có ingest theo schema, đối chiếu device_id, lưu CSDL, chống trùng, ACK nghiệp vụ hoặc firmware tương ứng. Các hành vi nghiệp vụ dưới đây vẫn là kế hoạch.
 
+Bo hiện dùng là D1 mini ESP8266/ESP-12F. ID `esp32_001`/`esp32_002` được giữ cho tương thích tài khoản và kiểm thử đã có; device_id không quy định loại vi điều khiển.
+
 Prefix: fallguard/v1/devices/{device_id}. Username mỗi thiết bị bằng device_id; backend dùng fallguard_backend. ID chỉ dùng chữ, số, dấu gạch dưới/gạch ngang; không chứa /, +, #. Server phải đối chiếu ID trong payload với ID trong topic.
 
 | Suffix | Chiều | QoS | Retain | Nội dung |
@@ -40,6 +42,6 @@ Lệnh có action thuộc CANCEL_ALARM, FIND_DEVICE, CONFIG_THRESHOLD. Bắt bu�
 
 LWT OFFLINE đăng ký tại connect; ONLINE retained gửi sau kết nối. Backend xử lý retained status cũ theo thời gian heartbeat, không coi đó là bằng chứng thiết bị đang online. LWT phụ thuộc keepalive; đo riêng timeout heartbeat.
 
-Phải chọn MQTT client firmware hỗ trợ publish QoS 1 và TLS. Xác nhận khả năng thư viện trước khi khóa dependencies; không suy ra QoS publish từ QoS subscribe. Với ESP-MQTT, cân nhắc enqueue để không chặn vòng cảm biến, và vẫn cần queue bền vững qua reboot.
+Phải chọn MQTT client firmware hỗ trợ publish QoS 1 và TLS. Xác nhận khả năng thư viện trước khi khóa dependencies; không suy ra QoS publish từ QoS subscribe. Với ESP8266 Arduino Core, dùng TLS BearSSL và đo heap, thời gian connect/reconnect, số mẫu cảm biến trễ trước khi chốt client. ESP-MQTT của ESP-IDF không phải thư viện dùng trực tiếp cho bo này. Vẫn cần queue LittleFS bền vững qua reboot; không hạ QoS hoặc bỏ xác minh TLS chỉ để vừa tài nguyên.
 
-Nguồn: [ESP-MQTT publish/enqueue](https://docs.espressif.com/projects/esp-mqtt/en/latest/esp32/).
+Nguồn: [ESP8266 BearSSL](https://arduino-esp8266.readthedocs.io/en/latest/esp8266wifi/bearssl-client-secure-class.html), [LittleFS](https://arduino-esp8266.readthedocs.io/en/latest/filesystem.html).

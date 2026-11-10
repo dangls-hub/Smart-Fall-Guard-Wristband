@@ -4,16 +4,16 @@
 * **Thời gian thực hiện:** Tuần 3 (Từ ngày 15/11/2026 đến 21/11/2026)
 * **Trạng thái:** Kế hoạch thực hiện
 
-> Cập nhật thiết kế 26/10/2026: đây là kế hoạch, chưa có kết quả nghiệm thu. Tham chiếu `docs/ARCHITECTURE_REVIEW.md`, `docs/HARDWARE_BOM.md` và `docs/LATENCY_TEST_PLAN.md`. Chỉ đánh dấu hoàn thành khi có bằng chứng.
+> Cập nhật phần cứng 10/11/2026: dùng D1 mini ESP8266/ESP-12F theo linh kiện đã mua; đây là kế hoạch, chưa có kết quả nghiệm thu. Tham chiếu `docs/ARCHITECTURE_REVIEW.md`, `docs/HARDWARE_BOM.md` và `docs/LATENCY_TEST_PLAN.md`. Chỉ đánh dấu hoàn thành khi có bằng chứng.
 
 ---
 
 ## 1. MỤC TIÊU CỐT LÕI CỦA SPIRAL 3
-1. Cài đặt cơ chế lưu trữ ngoại tuyến (Offline Buffer) vào bộ nhớ Flash ESP32 bằng SPIFFS/LittleFS khi mất kết nối Wi-Fi.
+1. Cài đặt cơ chế lưu trữ ngoại tuyến (Offline Buffer) vào bộ nhớ Flash ESP8266 bằng LittleFS khi mất kết nối Wi-Fi.
 2. Xây dựng cơ chế tự động gửi bù (Sync Telemetry/Alert) ngay khi kết nối Wi-Fi được khôi phục, đảm bảo không mất mát dữ liệu sự cố.
 3. Hoàn thiện tính năng truyền lệnh hai chiều (Downlink): Gửi lệnh từ Web Dashboard xuống vòng tay (`CANCEL_ALARM`, `FIND_DEVICE`, `CONFIG_THRESHOLD`).
 4. Tích hợp Webhook cảnh báo khẩn cấp đa kênh: Tự động gửi tin nhắn báo động kèm thông số lực va chạm tới Telegram Bot và Email của người thân.
-5. Xây dựng bộ mô phỏng phần cứng **Virtual ESP32 Simulator** trên Web giúp giả lập đầy đủ các kịch bản ngã và báo giả để phục vụ kiểm thử và thuyết trình.
+5. Xây dựng bộ mô phỏng phần cứng **Virtual ESP8266 Simulator** trên Web giúp giả lập đầy đủ các kịch bản ngã và báo giả để phục vụ kiểm thử và thuyết trình.
 
 ---
 
@@ -30,12 +30,12 @@
 
 ### 🛠️ 1. Phạm Việt Tiến – Embedded & Firmware Lead
 * **Task ID: SP3-HW-01**
-  * **Nhiệm vụ:** Lập trình Bộ đệm ngoại tuyến bằng bộ nhớ Flash SPIFFS (Offline Data Buffer).
+  * **Nhiệm vụ:** Lập trình Bộ đệm ngoại tuyến bằng bộ nhớ Flash LittleFS (Offline Data Buffer).
   * **Các bước thực hiện:**
-    1. Mount SPIFFS mà không tự format khi mount lỗi; báo lỗi và có quy trình khôi phục để tránh tự xóa hàng đợi.
+    1. Dùng `LittleFS.h`, đặt `LittleFSConfig::setAutoFormat(false)` qua `LittleFS.setConfig(...)` trước khi mount; báo lỗi và có quy trình khôi phục để tránh tự xóa hàng đợi.
     2. Tạo event_id và ghi sự kiện vào hàng đợi bền vững trước lần gửi đầu tiên, kể cả khi online; giới hạn queue và ghi atomic.
     3. Reconnect không chặn vòng cảm biến; gửi từng sự kiện qua sync với cùng event_id, chỉ dọn sự kiện sau event_ack=STORED từ backend sau commit; mất ACK thì retry.
-  * **File bàn giao:** `firmware/spiffs_buffer.h`, `firmware/spiffs_buffer.cpp`.
+  * **File bàn giao:** `firmware/spiffs_buffer.h`, `firmware/spiffs_buffer.cpp` (tên file/API cũ được giữ; phần triển khai mới dùng LittleFS, hiện chưa có).
   * **Thời gian:** 15/11/2026 – 17/11/2026 (12 giờ làm việc).
 
 * **Task ID: SP3-HW-02**
@@ -54,8 +54,8 @@
 * **Task ID: SP3-INF-01**
   * **Nhiệm vụ:** Cấu hình MQTT Last Will and Testament (LWT) & Tối ưu hóa Topic Downlink.
   * **Các bước thực hiện:**
-    1. Thiết lập gói tin LWT khi ESP32 kết nối Broker: Payload `{"status": "OFFLINE", "reason": "UNEXPECTED_DISCONNECT"}` với `Retain = true` tại topic `/status`.
-    2. Khi Broker phát hiện ESP32 mất tín hiệu KeepAlive đột ngột (phụ thuộc keepalive, phải đo riêng với heartbeat), Broker tự động publish gói tin LWT cho Server.
+    1. Thiết lập gói tin LWT khi ESP8266 kết nối Broker: Payload `{"status": "OFFLINE", "reason": "UNEXPECTED_DISCONNECT"}` với `Retain = true` tại topic `/status`.
+    2. Khi Broker phát hiện ESP8266 mất tín hiệu KeepAlive đột ngột (phụ thuộc keepalive, phải đo riêng với heartbeat), Broker tự động publish gói tin LWT cho Server.
     3. Kiểm tra đồng bộ cơ sở dữ liệu khi nhận gói tin từ topic `/sync`, đảm bảo các sự kiện ngoại tuyến được đánh dấu cờ `is_synced = true` và phân biệt thời điểm xảy ra với thời điểm server nhận.
   * **File bàn giao:** `broker/mosquitto.conf`, `database/schema.sql` (Cập nhật cột `is_synced`).
   * **Thời gian:** 15/11/2026 – 17/11/2026 (10 giờ làm việc).
@@ -94,9 +94,9 @@
 
 ### 🖥️ 4. Đỗ Hải Đăng – Frontend & UI/UX Lead
 * **Task ID: SP3-FE-01**
-  * **Nhiệm vụ:** Xây dựng bộ mô phỏng phần cứng **Virtual ESP32 Simulator** trên Web.
+  * **Nhiệm vụ:** Xây dựng bộ mô phỏng phần cứng **Virtual ESP8266 Simulator** trên Web.
   * **Các bước thực hiện:**
-    1. Tạo component `VirtualSimulator.jsx` có giao diện mô phỏng bo mạch ESP32 và cảm biến MPU6050.
+    1. Tạo component `VirtualSimulator.jsx` có giao diện mô phỏng bo mạch ESP8266 và cảm biến MPU6050.
     2. Thiết kế các nút bấm kịch bản mô phỏng trực tiếp:
        * Nút 1: *"Đi bộ / Vận động bình thường"* (Sinh dữ liệu $SVM \approx 1.0g \pm 0.2g$).
        * Nút 2: *"Ngã trượt chân đập mông/lưng"* (Sinh chuỗi rơi $0.3g \rightarrow$ va đập $3.4g \rightarrow$ bất động).
@@ -118,8 +118,8 @@
 ---
 
 ## 4. TIÊU CHÍ NGHIỆM THU SPIRAL 3 (DEFINITION OF DONE - DoD)
-* [ ] Rút dây mạng Wi-Fi: ESP32 vẫn phát hiện ngã, lưu vào Flash SPIFFS; khi cắm lại Wi-Fi, tự động gửi bù gói tin lên Server.
-* [ ] Rút nguồn đột ngột ESP32: Dashboard và Server phát hiện chuyển trạng thái `OFFLINE` với mục tiêu 15s; đo riêng LWT và timeout heartbeat.
+* [ ] Rút dây mạng Wi-Fi: ESP8266 vẫn phát hiện ngã, lưu vào Flash LittleFS; khi cắm lại Wi-Fi, tự động gửi bù gói tin lên Server.
+* [ ] Rút nguồn đột ngột ESP8266: Dashboard và Server phát hiện chuyển trạng thái `OFFLINE` với mục tiêu 15s; đo riêng LWT và timeout heartbeat.
 * [ ] Bấm nút "Tìm vòng tay" trên Web: Vòng tay nhận được lệnh và còi Buzzer kêu bíp bíp tức thì.
 * [ ] Sau CONFIRMED_FALL khi online: Tin nhắn cảnh báo kèm thông số gửi về Telegram Bot người thân trong vòng $\le 3s$.
 * [ ] Bộ mô phỏng Web Virtual Simulator hoạt động độc lập, kích hoạt được cả 5 kịch bản kiểm thử trực quan.

@@ -1,8 +1,8 @@
-# Chạy local và kết nối ESP32 qua TLS
+# Chạy local và kết nối ESP8266 qua TLS
 
 ## Local
 
-Làm theo README để tạo .env, broker/passwd và khởi động Compose. Mặc định MQTT 1883 có password/ACL, chỉ bind loopback; PostgreSQL cũng chỉ bind loopback. Không dùng địa chỉ localhost của server trên ESP32: localhost trên ESP32 là chính thiết bị.
+Làm theo README để tạo .env, broker/passwd và khởi động Compose. Mặc định MQTT 1883 có password/ACL, chỉ bind loopback; PostgreSQL cũng chỉ bind loopback. Không dùng địa chỉ localhost của server trên ESP8266: localhost trên ESP8266 là chính thiết bị.
 
 ## TLS cho mạng LAN
 
@@ -12,7 +12,7 @@ Yêu cầu Docker Compose >=2.24.4 (hỗ trợ !override). File docker-compose.t
 2. Chứng chỉ server phải có SAN chứa đúng DNS/IP dùng trong MQTT_HOST của client. Ví dụ LAN 192.168.1.50: SAN cần IP:192.168.1.50; nếu backend dùng localhost, thêm DNS:localhost.
 3. Dùng CA nội bộ hoặc CA tin cậy để ký cert; lưu server.crt/server.key tại certs/. Kiểm tra bằng openssl x509 -in certs/server.crt -noout -text và openssl verify -CAfile certs/ca.crt certs/server.crt. Khóa và file passwd phải đọc được bởi user Mosquitto trong container, không commit vào Git.
 4. Đặt .env: MQTT_BIND_ADDRESS bằng LAN IP server; MQTT_HOST bằng tên/IP khớp SAN; MQTT_PORT=8883; MQTT_PROTOCOL=mqtts. Client nạp CA và xác minh hostname, không bỏ qua kiểm tra chứng chỉ.
-5. Firmware cần có thời gian hợp lệ để kiểm tra hạn chứng chỉ, password riêng với username=device_id. MQTT service/backend vẫn phải được triển khai trước khi thử đầu-cuối.
+5. Trên D1 mini dùng `ESP8266WiFi.h` và TLS BearSSL (`WiFiClientSecure`), nạp CA và xác minh hostname; không dùng `setInsecure()`. Đo heap, thời gian handshake/reconnect và số mẫu trễ cùng MPU6050 50 Hz trước khi chốt MQTT client. Không coi TLS connect đồng bộ là không chặn. Firmware cần có thời gian hợp lệ để kiểm tra hạn chứng chỉ, password riêng với username=device_id. MQTT service/backend vẫn phải được triển khai trước khi thử đầu-cuối.
 
 Từ thư mục gốc repo:
 
@@ -23,6 +23,8 @@ docker compose -f docker-compose.yml -f docker-compose.tls.yml logs mosquitto
 ```
 
 Đây là cấu hình cho mạng LAN có kiểm soát. API hiện chỉ là khung và chưa có xác thực; giữ HOST=127.0.0.1 cho đến khi triển khai xác thực/phân quyền người giám hộ và HTTPS/WSS.
+
+Firmware MQTT/TLS hiện chưa triển khai. Xem [hướng dẫn D1 mini](../firmware/README.md). Các ID `esp32_001`/`esp32_002` bên dưới là tài khoản thử đã có, dùng được cho ESP8266.
 
 ## Kiểm tra phải đạt trước demo phần cứng
 

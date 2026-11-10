@@ -4,24 +4,26 @@
 * **Thời gian thực hiện:** Tuần 2 (Từ ngày 08/11/2026 đến 14/11/2026)
 * **Trạng thái:** Kế hoạch thực hiện
 
-> Cập nhật thiết kế 26/10/2026: đây là kế hoạch, chưa có kết quả nghiệm thu. Tham chiếu `docs/ARCHITECTURE_REVIEW.md`, `docs/HARDWARE_BOM.md` và `docs/LATENCY_TEST_PLAN.md`. Chỉ đánh dấu hoàn thành khi có bằng chứng.
+> Cập nhật phần cứng 10/11/2026: dùng D1 mini ESP8266/ESP-12F theo linh kiện đã mua; đây là kế hoạch, chưa có kết quả nghiệm thu. Tham chiếu `docs/ARCHITECTURE_REVIEW.md`, `docs/HARDWARE_BOM.md` và `docs/LATENCY_TEST_PLAN.md`. Chỉ đánh dấu hoàn thành khi có bằng chứng.
 
 ---
 
 ## 1. MỤC TIÊU CỐT LÕI CỦA SPIRAL 2
-1. Viết mã nguồn ESP32 thu thập gia tốc 3 trục ($a_x, a_y, a_z$) và con quay hồi chuyển ($\omega_x, \omega_y, \omega_z$) ở tần số lấy mẫu 50Hz.
+1. Viết mã nguồn ESP8266 thu thập gia tốc 3 trục ($a_x, a_y, a_z$) và con quay hồi chuyển ($\omega_x, \omega_y, \omega_z$) ở tần số lấy mẫu 50Hz.
 2. Cài đặt thuật toán nhận diện té ngã 4 giai đoạn dựa trên giá trị gia tốc tổng hợp $SVM$ và góc nghiêng cảm biến tại cổ tay.
 3. Cài đặt còi Buzzer cảnh báo tại chỗ và nút bấm vật lý hủy báo động trong 15 giây.
-4. Triển khai luồng truyền dữ liệu thời gian thực: ESP32 $\rightarrow$ MQTT Broker $\rightarrow$ Backend Server $\rightarrow$ WebSocket Gateway (Socket.io) $\rightarrow$ Web Dashboard với mục tiêu độ trễ từ CONFIRMED_FALL tới dashboard $\le 2s$, đo riêng tổng thời gian từ va chạm.
+4. Triển khai luồng truyền dữ liệu thời gian thực: ESP8266 $\rightarrow$ MQTT Broker $\rightarrow$ Backend Server $\rightarrow$ WebSocket Gateway (Socket.io) $\rightarrow$ Web Dashboard với mục tiêu độ trễ từ CONFIRMED_FALL tới dashboard $\le 2s$, đo riêng tổng thời gian từ va chạm.
 5. Hoàn thiện đồ thị Telemetry hiển thị gia tốc 3 trục trực tiếp trên giao diện Dashboard.
 
 ---
+
+ESP8266 dùng vòng lặp hợp tác: dùng lịch `millis()`/`micros()`, nhường CPU cho Wi-Fi, không chờ reconnect bằng vòng lặp chặn. Đo số mẫu trễ khi TLS handshake/reconnect; handshake đồng bộ có thể vượt chu kỳ 20 ms nên chưa cam kết đạt 50 Hz trong giai đoạn này.
 
 ## 2. PHÂN TÍCH RỦI RO & PHƯƠNG ÁN GIẢM THIỂU (RISK MANAGEMENT)
 | Rủi ro kỹ thuật phát hiện | Mức độ | Phương án xử lý trong Spiral 2 |
 |---|:---:|---|
 | Báo giả do vung tay và bỏ sót ngã chậm/ngã khuỵu. | Cao | Dùng FSM 4 pha làm bản nền, thu dữ liệu cổ tay, kiểm thử ngã không có rơi tự do và tách tập hiệu chỉnh khỏi đánh giá. |
-| Tần số lấy mẫu 50Hz gây tràn bộ nhớ đệm hoặc nghẽn mạng Wi-Fi nếu gửi liên tục. | Cao | Chỉ tính toán thuật toán nội bộ ở tần số 50Hz trên ESP32; chỉ đẩy Telemetry định kỳ 2s/lần hoặc gửi ngay lập tức khi phát hiện va chạm. |
+| Tần số lấy mẫu 50Hz gây tràn bộ nhớ đệm hoặc nghẽn mạng Wi-Fi nếu gửi liên tục. | Cao | Chỉ tính toán thuật toán nội bộ ở tần số 50Hz trên ESP8266; chỉ đẩy Telemetry định kỳ 2s/lần hoặc gửi ngay lập tức khi phát hiện va chạm. |
 | Độ trễ do CSDL và mạng. | Trung bình | Lưu transaction và chống trùng trước khi ACK/phát Socket.io; đo độ trễ sau xác nhận, không đẩy cảnh báo chưa được lưu bền vững. |
 
 ---
@@ -45,7 +47,7 @@
     1. Triển khai máy trạng thái (FSM - Finite State Machine): `IDLE` $\rightarrow$ `FREE_FALL` $\rightarrow$ `IMPACT` $\rightarrow$ `POSTURE_CHANGE` $\rightarrow$ `INACTIVITY` $\rightarrow$ `LOCAL_ALARM` $\rightarrow$ `CONFIRMED_FALL`.
     2. Cài đặt ngưỡng: Pha 1 ($SVM < 0.5g$), Pha 2 ($SVM > 2.8g$ trong 500ms), Pha 3 ($\Delta \text{Angle} > 45^\circ$), Pha 4 (đánh giá biến thiên theo cửa sổ accel và gyro trong 3s; ngưỡng cần đo/hiệu chỉnh).
     3. Kích hoạt còi hú Buzzer (tần số 2kHz ngắt quãng) và nhấp nháy LED đỏ.
-    4. Lắng nghe nút bấm GPIO 18 (debounce bằng thời gian; nếu dùng ISR chỉ đặt cờ, không làm I/O/MQTT trong ISR). Nếu người dùng ấn nút trong 15s $\rightarrow$ Hủy còi và trở về `IDLE`.
+    4. Lắng nghe nút bấm D5/GPIO14 (debounce bằng thời gian; nếu dùng ISR chỉ đặt cờ, không làm I/O/MQTT trong ISR). Nếu người dùng ấn nút trong 15s $\rightarrow$ Hủy còi và trở về `IDLE`.
     5. Hết 15s không bấm $\rightarrow$ Chuyển sang `CONFIRMED_FALL` và gọi hàm phát gói tin MQTT.
   * **File bàn giao:** `firmware/fall_detection.h`, `firmware/fall_detection.cpp`, `firmware/SmartFallGuard.ino`.
   * **Thời gian:** 11/11/2026 – 14/11/2026 (16 giờ làm việc).
@@ -120,7 +122,7 @@
 ---
 
 ## 4. TIÊU CHÍ NGHIỆM THU SPIRAL 2 (DEFINITION OF DONE - DoD)
-* [ ] ESP32 đọc được dữ liệu MPU6050 tần số 50Hz và tính chính xác công thức $SVM$.
+* [ ] ESP8266 đọc được dữ liệu MPU6050 tần số 50Hz và tính chính xác công thức $SVM$.
 * [ ] Thuật toán phát hiện ngã kích hoạt được còi hú tại chỗ; ấn nút vật lý hủy còi thành công.
 * [ ] Khi hết 15s không bấm hủy, gói tin cảnh báo được gửi qua MQTT lên Backend.
 * [ ] Backend phát WebSocket tới Web Dashboard; Modal đỏ bật lên với âm thanh cảnh báo.
@@ -131,5 +133,5 @@
 
 ## 5. NHIỆM VỤ BÁO CÁO & HỌP ĐÁNH GIÁ CUỐI SPIRAL 2
 * **Biên bản họp Spiral Review:** Thứ 7 ngày 14/11/2026 (Họp trực tiếp tại phòng lab).
-* **Nội dung:** Thử nghiệm ngã thực tế (thả rơi cảm biến vào nệm) để kiểm chứng luồng hoạt động End-to-End từ ESP32 lên Dashboard.
+* **Nội dung:** Thử nghiệm ngã thực tế (thả rơi cảm biến vào nệm) để kiểm chứng luồng hoạt động End-to-End từ ESP8266 lên Dashboard.
 * **Đầu ra văn bản:** **Báo cáo Tiến độ Kỹ thuật Tuần 2 (kèm kết quả đo độ trễ và ảnh chụp giao diện)** do Chính và Đăng phụ trách tổng hợp.

@@ -16,7 +16,7 @@ echo [3/4] Dang tao nhanh develop va cac nhanh phan cong thanh vien...
 git checkout -b develop
 
 REM Nhanh theo thanh vien chuyen trach
-git branch feat/firmware-esp32
+git branch feat/firmware-esp8266
 git branch feat/iot-infra-broker
 git branch feat/backend-server
 git branch feat/frontend-dashboard

@@ -222,3 +222,27 @@ Môi trường: Linux, Node.js **22.22.1**, PostgreSQL image `postgres:17-alpine
 Sandbox ban đầu chặn stream của Node test runner; các kết quả test ở trên được chạy ngoài sandbox theo phê duyệt. Các test PostgreSQL chỉ đọc/truy vấn biểu thức, không sửa schema hoặc dữ liệu bền vững, không restart service.
 
 Giới hạn: chưa thử init schema trên volume mới hoặc giữ dữ liệu qua restart; chưa thử ngắt kết nối sau khi session PostgreSQL đã thiết lập, lỗi idle hoặc timeout khi server không phản hồi. Chưa có transaction API, MQTT ingest, ACK/dedup, TLS hoặc heartbeat. Không đánh dấu toàn bộ Spiral 1 hoàn thành hay nghiệm thu thay reviewer. Hướng dẫn và hợp đồng helper tại [DATABASE.md](DATABASE.md).
+
+## Đổi bo D1 mini ESP8266 — 10/11/2026
+
+Nhánh `chore/migrate-hardware-esp8266-d1-mini`, từ `main` tại `0608867`. Theo ảnh linh kiện đã mua, cập nhật mục tiêu thành bo dạng D1 mini ESP8266/ESP-12F. Chưa xác minh hãng bo, flash, USB-UART hoặc mạch nguồn thực; chưa xác nhận các linh kiện còn lại đã mua.
+
+- Cập nhật README, BOM, hướng dẫn firmware/TLS/MQTT/pin/độ trễ và bốn Spiral ở cả hai thư mục. Chân mới: SDA D2/GPIO4, SCL D1/GPIO5, nút D5/GPIO14, driver còi D6/GPIO12, LED D7/GPIO13.
+- Thêm nguồn EasyEDA và SVG Rev C, xuất lại PDF/PNG hiện hành. Rev A/B và log nghiệm thu cũ giữ nguyên. Các link EasyEDA online vẫn là bản ESP32 cũ; chưa cập nhật project online.
+- Chỉ sửa chú thích trong khung firmware, simulator và cấu hình broker; chưa triển khai driver/FSM/Wi-Fi/MQTT/buffer. Buffer mới dự kiến LittleFS, giữ tên file/API `spiffs_buffer.*`. Giữ tài khoản/device_id `esp32_001`/`esp32_002`, không sửa credentials hoặc lịch sử kiểm thử.
+
+Đã kiểm tra thực tế trong lượt này:
+
+| Kiểm tra | Kết quả |
+|---|---|
+| `python3 docs/hardware/validate_schematic.py` | PASS Rev C: 2 sheet, 18 ký hiệu, 52 chân, 18 net |
+| Đảo SDA/SCL trên bản sao JSON trong thư mục tạm | Validator từ chối đúng net SDA; file nguồn thật giữ nguyên |
+| Đối chiếu bốn cặp file Spiral | Giống nhau từng byte |
+| Link Markdown nội bộ trong README và hướng dẫn đổi bo | Trỏ tới file tồn tại |
+| Xuất SVG bằng CairoSVG, render PDF bằng Poppler, xem hình | Đã kiểm tra nhãn chân và bố cục của Rev C |
+| `bash -n setup_git_branches.sh` | PASS; không thực thi script tạo/push hàng loạt nhánh |
+| `g++ -fsyntax-only -x c++` trên sketch chính và ba file `.cpp` | PASS cú pháp host của khung hiện có; không phải build ESP8266 |
+| `npm test` trong backend, Node.js 22.22.1 | 20/20 pass, 0 fail/skip; chạy ngoài sandbox sau khi sandbox chặn stream/cổng local |
+| `git diff --check` | PASS |
+
+Chưa có Arduino CLI/PlatformIO trong môi trường này, chưa build firmware bằng ESP8266 toolchain, chưa nạp bo hoặc thử I²C/Wi-Fi/TLS/LittleFS thật. Chưa đo chu kỳ lấy mẫu khi TLS handshake/reconnect, độ chính xác, độ trễ hoặc runtime pin. Các KPI và tiêu chí nghiệm thu giữ nguyên; không coi việc đổi tài liệu/sơ đồ là hoàn thành firmware hoặc nghiệm thu phần cứng.
