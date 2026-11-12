@@ -8,7 +8,7 @@ Dự án Bài tập lớn IoT — Nhóm 4, GEHIHI. Kế hoạch triển khai: 01
 
 ```mermaid
 flowchart LR
-    IMU["MPU6050: accel + gyro, 50 Hz"] --> ESP["ESP32: FSM + còi/nút hủy"]
+    IMU["MPU6050: accel + gyro, 50 Hz"] --> ESP["ESP8266 D1 mini: FSM + còi/nút hủy"]
     ESP --> BUF["Hàng đợi sự kiện bền vững"]
     ESP <-->|MQTT TLS 8883| MQTT["Mosquitto"]
     MQTT <--> BE["Express + MQTT consumer + Socket.io"]
@@ -17,7 +17,7 @@ flowchart LR
     BE --> ALERT["Telegram / Email"]
 ```
 
-- ESP32 tiếp tục phát hiện và báo tại chỗ khi mạng mất; reconnect phải không chặn vòng lấy mẫu 20 ms.
+- ESP8266 tiếp tục phát hiện và báo tại chỗ khi mạng mất; reconnect phải không chặn vòng lấy mẫu 20 ms.
 - PostgreSQL là CSDL duy nhất của bản đầu. Heartbeat chạy trong tiến trình backend khi được triển khai; chưa cần một daemon độc lập.
 - MQTT có tài khoản riêng theo device_id; frontend dùng REST/Socket.io qua backend, không kết nối broker trực tiếp.
 - Chỉ xóa sự kiện offline sau ACK của backend xác nhận đã commit CSDL. QoS 1 có thể phát trùng; cần chống trùng theo event_id.
@@ -46,29 +46,26 @@ FSM bản nền:
 
 ## 3. Phần cứng và nguồn điện
 
-Xem [danh sách linh kiện, tiêu chí mua và đấu nối](docs/HARDWARE_BOM.md).
+Bo hiện dùng là **Wemos D1 mini ESP8266**. Dùng [sơ đồ Rev B cập nhật cho ESP8266](docs/hardware/README.md), [danh sách linh kiện](docs/HARDWARE_BOM.md) và [hướng dẫn nạp chương trình thử](firmware/README.md).
 
-Đã có [sơ đồ EasyEDA USB Rev A và file nguồn chỉnh sửa](docs/hardware/README.md) cho bản lắp thử.
-
-| Chức năng | GPIO ESP32 | Ghi chú |
+| Chức năng | Chân D1 mini (GPIO) | Ghi chú |
 |---|---|---|
-| MPU6050 SDA / SCL | 21 / 22 | Pull-up I²C lên 3,3 V; kiểm tra module |
+| MPU6050 SDA / SCL | D2 (4) / D1 (5) | Pull-up I²C lên 3,3 V; kiểm tra module |
 | MPU6050 AD0 | GND | Địa chỉ 0x68 |
-| Nút hủy | 18 → nút → GND | INPUT_PULLUP, debounce |
-| Buzzer thụ động | 19 → mạch driver | PWM 2 kHz; không cấp tải còi trực tiếp tùy tiện |
-| LED ngoài | 23 → điện trở → LED → GND | Tránh thêm tải ngoài vào chân boot strap GPIO2 |
+| Nút hủy | D6 (12) → nút → GND | INPUT_PULLUP, debounce |
+| Buzzer thụ động | D5 (14) → mạch driver | PWM 2 kHz; theo mạch transistor trong JSON |
+| LED ngoài | D7 (13) → điện trở → LED → GND | Không dùng D3/D4/D8, là các chân liên quan boot |
 
-Thử nghiệm ban đầu dùng USB. Nguồn pin mục tiêu:
+D1/D2 là nhãn trên bo, không phải GPIO1/GPIO2. Chạy USB trước; hai sketch thử I²C/I/O và Wi-Fi đã có mã nhưng chưa có bằng chứng nạp bo. Chương trình chính, driver và FSM vẫn là khung TODO.
+
+Đường nguồn pin trong sơ đồ hiện tại:
 
 ```text
-USB 5 V → mạch sạc có power path ← pin Li-Po 1S có bảo vệ
-                    ↓ SYS
-            buck-boost 3,3 V
-                    ↓
-              ESP32 + cảm biến
+USB sạc → TP4056 có bảo vệ ↔ Li-Po 1S 300 mAh
+           OUT → công tắc/JP1 → chân 5V D1 mini → ổn áp 3,3 V → MPU6050
 ```
 
-Không dùng phương án pin 1S → AMS1117-3.3 V; không cấp pin 3,7–4,2 V trực tiếp vào chân 3V3. Phải kiểm tra cách cấp nguồn của đúng bo mua về, tránh cấp USB và nguồn ngoài đồng thời khi chưa có cách ly phù hợp.
+TP4056 không có power path: ngắt tải khi sạc. Tắt công tắc pin và mở JP1 trước khi cắm USB của D1 mini. Phương án cấp qua chân 5V chưa được đo sụt áp; phải kiểm tra regulator của bo thực tế. BOM còn nêu phương án TPS63070 cấp 3,3 V, chưa được vẽ trong JSON. Không cấp pin 3,7–4,2 V trực tiếp vào 3V3 hoặc A0.
 
 ## 4. KPI cần đo
 
@@ -82,9 +79,9 @@ Không dùng phương án pin 1S → AMS1117-3.3 V; không cấp pin 3,7–4,2 V
 | Thời lượng pin | Mong muốn ≥24 giờ; dung lượng chốt sau đo dòng | Chưa đo |
 | Phát hiện offline | Mục tiêu ≤15 giây; đo riêng LWT và timeout heartbeat | Chưa đo |
 
-Pin 400 mAh chạy 24 giờ đòi hỏi dòng trung bình lý tưởng ≤16,7 mA trước tổn hao/dung lượng dự phòng; chưa có phép đo chứng minh DevKit đạt được. Không suy ra thời lượng thực từ dòng deep sleep khi thiết bị cần lấy mẫu liên tục.
+Với pin 300 mAh, chạy 24 giờ đòi hỏi dòng trung bình lý tưởng ≤12,5 mA trước tổn hao và dung lượng dự phòng. Ước tính 3–3,5 giờ trong BOM chưa phải kết quả đo. Không suy ra thời lượng thực từ dòng deep sleep khi thiết bị cần lấy mẫu liên tục.
 
-Các báo cáo [pin](docs/BATTERY_BENCHMARK_REPORT.md), [hạ tầng](docs/INFRA_TEST_REPORT.md) và [50 ca thử](docs/TEST_CASES_50_FALLS.md) là mẫu ghi nhận. Các tệp hardware_schematic.png/.pdf, ui_wireframe.png và LATENCY_TEST_RESULTS.xlsx hiện rỗng, chưa dùng làm bằng chứng. Xem [quy trình đo độ trễ](docs/LATENCY_TEST_PLAN.md).
+Các báo cáo [pin](docs/BATTERY_BENCHMARK_REPORT.md), [hạ tầng](docs/INFRA_TEST_REPORT.md) và [50 ca thử](docs/TEST_CASES_50_FALLS.md) là mẫu ghi nhận. hardware_schematic.png/.pdf đã có bản vẽ nguồn ESP8266; đây là thiết kế, chưa chứng minh mạch thật chạy. ui_wireframe.png và LATENCY_TEST_RESULTS.xlsx hiện rỗng. Xem [quy trình đo độ trễ](docs/LATENCY_TEST_PLAN.md).
 
 ## 5. Thiết lập môi trường phát triển
 
@@ -133,7 +130,7 @@ SP1-BE-02 có hai khung route `GET /api/devices` và `GET /api/events`: trả HT
 
 Đã có bài nghiệm thu riêng `npm run test:mosquitto` dùng broker thật, không mock. Bài này **dừng/khởi động lại service Mosquitto local**; chỉ chạy với broker thử nghiệm ở `127.0.0.1`, đủ hai tài khoản thiết bị thật theo `.env.example`. Xem [kết quả và cách chạy nghiệm thu MQTT local](docs/VALIDATION.md#nghiệm-thu-mosquitto-thật-local--28102026).
 
-Khi gắn ESP32 qua LAN, dùng [hướng dẫn TLS](docs/DEPLOYMENT.md) và Compose override; chưa mở API ra ngoài cho đến khi có xác thực/phân quyền. Chứng chỉ có sẵn trong repo là placeholder.
+Khi gắn ESP8266 qua LAN, dùng [hướng dẫn TLS](docs/DEPLOYMENT.md) và Compose override; chưa mở API ra ngoài cho đến khi có xác thực/phân quyền. Chứng chỉ có sẵn trong repo là placeholder. Tài khoản MQTT `esp32_001`/`esp32_002` và tên nhánh `feat/firmware-esp32` là tên đã có, không cần đổi chỉ vì thay bo.
 
 ## 6. Phân công và kế hoạch
 
