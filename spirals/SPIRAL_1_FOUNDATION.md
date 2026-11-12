@@ -4,13 +4,13 @@
 * **Thời gian thực hiện:** Tuần 1 (Từ ngày 01/11/2026 đến 07/11/2026)
 * **Trạng thái:** Sẵn sàng triển khai
 
-> Cập nhật thiết kế 26/10/2026: đây là kế hoạch, chưa có kết quả nghiệm thu. Tham chiếu `docs/ARCHITECTURE_REVIEW.md`, `docs/HARDWARE_BOM.md` và `docs/LATENCY_TEST_PLAN.md`. Chỉ đánh dấu hoàn thành khi có bằng chứng.
+> Cập nhật phần cứng 10/11/2026: dùng D1 mini ESP8266/ESP-12F theo linh kiện đã mua; đây là kế hoạch, chưa có kết quả nghiệm thu. Tham chiếu `docs/ARCHITECTURE_REVIEW.md`, `docs/HARDWARE_BOM.md` và `docs/LATENCY_TEST_PLAN.md`. Chỉ đánh dấu hoàn thành khi có bằng chứng.
 
 ---
 
 ## 1. MỤC TIÊU CỐT LÕI CỦA SPIRAL 1
 1. Hoàn thiện tài liệu kiến trúc tổng thể hệ thống 3 lớp (Edge Node $\rightarrow$ Cloud Broker & Backend $\rightarrow$ Dashboard).
-2. Thiết kế xong sơ đồ nguyên lý phần cứng kết nối ESP32 với MPU6050, nút bấm và còi báo động.
+2. Thiết kế xong sơ đồ nguyên lý phần cứng kết nối ESP8266 với MPU6050, nút bấm và còi báo động.
 3. Cài đặt và kích hoạt MQTT Broker (Mosquitto/EMQX) trên máy chủ/Docker, định nghĩa chuẩn cấu trúc Topic và Payload JSON.
 4. Xây dựng Database Schema lưu trữ trạng thái thiết bị và dữ liệu telemetry.
 5. Khởi tạo khung dự án Backend (Node.js/Express) và Frontend (React/Vite).
@@ -20,7 +20,7 @@
 ## 2. PHÂN TÍCH RỦI RO & PHƯƠNG ÁN GIẢM THIỂU (RISK MANAGEMENT)
 | Rủi ro kỹ thuật phát hiện | Mức độ | Phương án xử lý trong Spiral 1 |
 |---|:---:|---|
-| MPU6050 bị nhiễu dây cáp I2C hoặc sai lệch địa chỉ I2C ($0x68$ vs $0x69$). | Trung bình | Kiểm tra chân AD0 (nối GND để cố định $0x68$). Viết script I2C Scanner trên ESP32 để phát hiện đúng địa chỉ trước khi code driver. |
+| MPU6050 bị nhiễu dây cáp I2C hoặc sai lệch địa chỉ I2C ($0x68$ vs $0x69$). | Trung bình | Kiểm tra chân AD0 (nối GND để cố định $0x68$). Viết script I2C Scanner trên ESP8266 để phát hiện đúng địa chỉ trước khi code driver. |
 | Xung đột phiên bản Node.js / thư viện MQTT khi chạy trên các máy khác nhau. | Thấp | Cung cấp file `docker-compose.yml` và chuẩn hóa phiên bản Node.js 22, file `.env.example`. |
 | Chưa có thiết bị phần cứng thật để nhóm làm Frontend và Backend kiểm thử. | Cao | Nam và Đăng thống nhất tạo payload JSON mẫu và mock dữ liệu ngay từ đầu tuần 1. |
 
@@ -30,22 +30,22 @@
 
 ### 🛠️ 1. Phạm Việt Tiến – Embedded & Firmware Lead
 * **Task ID: SP1-HW-01**
-  * **Trạng thái:** Hoàn thành thiết kế Rev B và file bàn giao; kiểm tra điện áp/dòng/cách ly trên phần cứng chờ khi có linh kiện.
+  * **Trạng thái:** Đã có thiết kế Rev C cho D1 mini; chưa nghiệm thu lại trên mạch thật. Rev A/B ESP32 chỉ giữ làm lịch sử.
   * **Nhiệm vụ:** Thiết kế Sơ đồ nguyên lý mạch điện phần cứng (Hardware Schematic).
   * **Các bước thực hiện:**
-    1. Lựa chọn sơ đồ chân ESP32 NodeMCU 30-pin: GPIO 21 (SDA), GPIO 22 (SCL), GPIO 19 (Buzzer), GPIO 18 (Nút bấm kéo trở Pull-up), GPIO 23 (LED ngoài qua điện trở).
+    1. Lựa chọn sơ đồ chân D1 mini ESP8266/ESP-12F: D2/GPIO4 (SDA), D1/GPIO5 (SCL), D6/GPIO12 (Buzzer qua driver), D5/GPIO14 (nút hủy INPUT_PULLUP), D7/GPIO13 (LED ngoài qua điện trở). Tránh D3/D4/D8 vì liên quan boot.
     2. Chạy USB trước; thiết kế pin Li-Po 1S có bảo vệ + sạc có power path + buck-boost 3,3 V. Chọn dòng sạc theo viên pin, thêm driver buzzer và kiểm tra cách ly nguồn khi nạp USB.
     3. Vẽ mạch trên Fritzing hoặc EasyEDA, xuất file sơ đồ mạch dạng PDF và PNG.
   * **File bàn giao:** `docs/hardware_schematic.pdf`, `docs/hardware_schematic.png`.
-  * **File nguồn:** `docs/hardware/SmartFallGuard_RevB.json` (EasyEDA Standard, 2 sheet).
+  * **File nguồn:** `docs/hardware/SmartFallGuard_RevC.json` (EasyEDA Standard, 2 sheet).
   * **Thời gian:** 01/11/2026 – 03/11/2026 (12 giờ làm việc).
 
 * **Task ID: SP1-HW-02**
   * **Nhiệm vụ:** Viết chương trình kiểm tra I2C Scanner và kết nối Wi-Fi cơ bản.
   * **Các bước thực hiện:**
-    1. Cài đặt môi trường Arduino IDE / PlatformIO cho vi điều khiển ESP32.
-    2. Nạp code quét bus I2C để xác thực ESP32 giao tiếp tốt với MPU6050 tại địa chỉ `0x68`.
-    3. Khởi tạo kết nối Wi-Fi sử dụng `WiFi.begin(ssid, password)` và kiểm tra in ra địa chỉ IP cục bộ qua Serial Monitor (115200 baud).
+    1. Cài ESP8266 Arduino Core, chọn board LOLIN(WEMOS) D1 R2 & mini; xem `firmware/README.md`. Hai sketch test hiện là khung rỗng, cần triển khai trước khi nạp thử.
+    2. Nạp code quét bus I2C để xác thực ESP8266 giao tiếp tốt với MPU6050 tại địa chỉ `0x68`.
+    3. Dùng `ESP8266WiFi.h`, gọi `WiFi.begin(ssid, password)` và in địa chỉ IP cục bộ qua Serial Monitor (115200 baud).
   * **File bàn giao:** `firmware/tests/i2c_scanner.ino`, `firmware/tests/wifi_test.ino`.
   * **Thời gian:** 04/11/2026 – 06/11/2026 (10 giờ làm việc).
 

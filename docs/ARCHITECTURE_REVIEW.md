@@ -1,6 +1,12 @@
-# Rà soát kiến trúc — 26/10/2026
+# Rà soát kiến trúc — 26/10/2026, cập nhật bo 10/11/2026
 
-## Hiện trạng
+## Cập nhật phần cứng 10/11/2026
+
+Dùng bo dạng D1 mini ESP8266, module ESP-12F theo ảnh người dùng đã mua, thay ESP32 trong kế hoạch ban đầu. Chưa xác minh nhà sản xuất/mạch nguồn/dung lượng flash thực. Sơ đồ hiện hành là Rev C; Rev A/B và log nghiệm thu cũ giữ nguyên để truy vết. Thông tin đấu dây và nạp tại [firmware/README.md](../firmware/README.md).
+
+Giữ yêu cầu xử lý tại chỗ, lấy mẫu 50 Hz, TLS và QoS 1; phải kiểm chứng lại heap, watchdog và mẫu trễ khi handshake/reconnect trên ESP8266. Nếu MQTT client chặn vượt hạn lấy mẫu, cần giải quyết kiến trúc kết nối trước khi nghiệm thu. Dùng LittleFS cho buffer mới; các file/API `spiffs_buffer.*` vẫn là khung với tên cũ. Giữ các device_id `esp32_001`/`esp32_002` vì chúng độc lập loại MCU và đã dùng trong tài khoản thử.
+
+## Hiện trạng tại lượt rà soát 26/10/2026
 
 Repo có khung thư mục, schema SQL, cấu hình broker, server Express tối thiểu và trang React tiêu đề. Driver cảm biến, FSM, buffer, MQTT consumer, CSDL helper, Socket.io, webhook và API còn thiếu phần triển khai. Các số liệu 92%, 28,5 giờ và độ trễ 0,85–1,45 giây trước đây không có log thử nghiệm đi kèm nên đã bỏ khỏi bảng kết quả.
 
@@ -8,7 +14,7 @@ Repo có khung thư mục, schema SQL, cấu hình broker, server Express tối 
 
 | Hạng mục | Quyết định | Lý do / yêu cầu triển khai |
 |---|---|---|
-| Xử lý ngã | Tại ESP32, độc lập mạng | Mất broker không được ngừng lấy mẫu hoặc báo tại chỗ |
+| Xử lý ngã | Tại D1 mini ESP8266, độc lập mạng | Mất broker không được ngừng lấy mẫu hoặc báo tại chỗ |
 | Cảm biến | MPU6050 ±8 g, accel + gyro, 50 Hz | 4096 LSB/g chỉ đúng với dải này; kiểm tra saturation, offset, dt |
 | Vị trí đeo | Cổ tay cho prototype | Không suy luận góc thân người trực tiếp từ góc cổ tay; cần dữ liệu thực |
 | Thuật toán | FSM ngưỡng làm bản nền | Timeout từng pha; đánh giá ngã không có rơi tự do và báo giả do vung tay |
@@ -47,8 +53,9 @@ Repo có khung thư mục, schema SQL, cấu hình broker, server Express tối 
 
 ## Nguồn kỹ thuật
 
-- [ESP32 DevKitC: chỉ một đường cấp nguồn tại một thời điểm](https://docs.espressif.com/projects/esp-dev-kits/en/latest/esp32/esp32-devkitc/user_guide.html).
-- [ESP32-WROOM-32E: điện áp và dòng RF](https://documentation.espressif.com/esp32-wroom-32e_esp32-wroom-32ue_datasheet_en.html).
+- [D1 mini: GPIO 3,3 V và thông số bo tham chiếu](https://www.wemos.cc/en/latest/d1/d1_mini.html); bo trong ảnh cần đối chiếu phiên bản thực.
+- [ESP8266: watchdog, vòng lặp và ADC](https://arduino-esp8266.readthedocs.io/en/latest/reference.html).
+- [ESP8266 BearSSL: yêu cầu CPU/RAM](https://arduino-esp8266.readthedocs.io/en/latest/esp8266wifi/bearssl-client-secure-class.html).
 - [MPU6050: dải đo và giới hạn điện](https://invensense.tdk.com/wp-content/uploads/2015/02/MPU-6000-Datasheet.pdf).
 - [Mosquitto: listener, password_file, ACL và TLS](https://mosquitto.org/man/mosquitto-conf-5.html).
 - [PostgreSQL official image: init scripts và volumes](https://hub.docker.com/_/postgres).

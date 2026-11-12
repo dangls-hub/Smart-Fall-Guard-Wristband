@@ -2,6 +2,8 @@
 
 Người phụ trách: Phạm Việt Tiến. Mục tiêu mong muốn ≥24 giờ; chưa chốt dung lượng để bảo đảm mục tiêu.
 
+Bo mục tiêu hiện là D1 mini ESP8266/ESP-12F. Chưa xác minh regulator, dung lượng flash hoặc dòng tiêu thụ của bo thực tế. A0 có thể có cầu chia áp trên bo; phải đo/xác minh trước khi thiết kế đo pin, không áp dụng ADC1 của ESP32.
+
 Ghi: ngày thử, commit firmware, mã bo/IMU/charger/converter, pin và dung lượng danh định, điện áp cắt, chu kỳ telemetry, mức Wi-Fi, chế độ sleep, số lần còi và nhiệt độ môi trường.
 
 | Chế độ | Điện áp pin | Dòng trung bình | Dòng đỉnh / sụt áp | Thời gian quan sát |

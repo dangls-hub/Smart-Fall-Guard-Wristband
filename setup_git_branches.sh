@@ -20,7 +20,7 @@ git checkout -b develop
 
 echo "🛠️ Đang tạo các nhánh thành viên và nhánh theo Spiral..."
 # Nhánh theo thành viên chuyên trách
-git branch feat/firmware-esp32          # Phạm Việt Tiến - Embedded & Firmware Lead
+git branch feat/firmware-esp8266          # Phạm Việt Tiến - Embedded & Firmware Lead
 git branch feat/iot-infra-broker        # Trần Đình Nam - IoT Infrastructure & Cloud Lead
 git branch feat/backend-server          # Nguyễn Hữu Chính - Backend Lead
 git branch feat/frontend-dashboard      # Đỗ Hải Đăng - Frontend & UI/UX Lead

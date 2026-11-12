@@ -8,7 +8,7 @@ Dự án Bài tập lớn IoT — Nhóm 4, GEHIHI. Kế hoạch triển khai: 01
 
 ```mermaid
 flowchart LR
-    IMU["MPU6050: accel + gyro, 50 Hz"] --> ESP["ESP32: FSM + còi/nút hủy"]
+    IMU["MPU6050: accel + gyro, 50 Hz"] --> ESP["ESP8266: FSM + còi/nút hủy"]
     ESP --> BUF["Hàng đợi sự kiện bền vững"]
     ESP <-->|MQTT TLS 8883| MQTT["Mosquitto"]
     MQTT <--> BE["Express + MQTT consumer + Socket.io"]
@@ -17,7 +17,7 @@ flowchart LR
     BE --> ALERT["Telegram / Email"]
 ```
 
-- ESP32 tiếp tục phát hiện và báo tại chỗ khi mạng mất; reconnect phải không chặn vòng lấy mẫu 20 ms.
+- ESP8266 tiếp tục phát hiện và báo tại chỗ khi mạng mất; reconnect phải không chặn vòng lấy mẫu 20 ms.
 - PostgreSQL là CSDL duy nhất của bản đầu. Heartbeat chạy trong tiến trình backend khi được triển khai; chưa cần một daemon độc lập.
 - MQTT có tài khoản riêng theo device_id; frontend dùng REST/Socket.io qua backend, không kết nối broker trực tiếp.
 - Chỉ xóa sự kiện offline sau ACK của backend xác nhận đã commit CSDL. QoS 1 có thể phát trùng; cần chống trùng theo event_id.
@@ -46,17 +46,21 @@ FSM bản nền:
 
 ## 3. Phần cứng và nguồn điện
 
-Xem [danh sách linh kiện, tiêu chí mua và đấu nối](docs/HARDWARE_BOM.md).
+Bo hiện dùng: **D1 mini dạng tương thích WEMOS/LOLIN, ESP8266 với module ESP-12F** theo ảnh linh kiện đã mua. Chưa xác minh nhà sản xuất, dung lượng flash hoặc mạch nguồn của đúng bo.
 
-Đã có [sơ đồ EasyEDA USB Rev A và file nguồn chỉnh sửa](docs/hardware/README.md) cho bản lắp thử.
+Xem [danh sách linh kiện và đấu nối](docs/HARDWARE_BOM.md) và [hướng dẫn bắt đầu với D1 mini](firmware/README.md).
 
-| Chức năng | GPIO ESP32 | Ghi chú |
+Dùng [sơ đồ Rev C cho D1 mini và file nguồn EasyEDA](docs/hardware/README.md). Rev A/B là thiết kế ESP32 cũ, chỉ giữ tham khảo lịch sử.
+
+| Chức năng | Chân D1 mini (GPIO) | Ghi chú |
 |---|---|---|
-| MPU6050 SDA / SCL | 21 / 22 | Pull-up I²C lên 3,3 V; kiểm tra module |
+| MPU6050 SDA / SCL | D2 (4) / D1 (5) | Pull-up I²C lên 3,3 V; kiểm tra module |
 | MPU6050 AD0 | GND | Địa chỉ 0x68 |
-| Nút hủy | 18 → nút → GND | INPUT_PULLUP, debounce |
-| Buzzer thụ động | 19 → mạch driver | PWM 2 kHz; không cấp tải còi trực tiếp tùy tiện |
-| LED ngoài | 23 → điện trở → LED → GND | Tránh thêm tải ngoài vào chân boot strap GPIO2 |
+| Nút hủy | D5 (14) → nút → GND | INPUT_PULLUP, debounce |
+| Buzzer thụ động | D6 (12) → mạch driver | PWM 2 kHz; không cấp tải còi trực tiếp tùy tiện |
+| LED ngoài | D7 (13) → điện trở → LED → GND | Tránh chân boot D3/D4/D8 |
+
+D1/D2 là nhãn trên bo, không phải GPIO1/GPIO2. MPU6050 dùng nguồn và pull-up I²C 3,3 V; mọi GND nối chung. Sơ đồ này không dùng các chân D3/GPIO0, D4/GPIO2 và D8/GPIO15 để tránh ảnh hưởng khởi động.
 
 Thử nghiệm ban đầu dùng USB. Nguồn pin mục tiêu:
 
@@ -65,7 +69,7 @@ USB 5 V → mạch sạc có power path ← pin Li-Po 1S có bảo vệ
                     ↓ SYS
             buck-boost 3,3 V
                     ↓
-              ESP32 + cảm biến
+              ESP8266 + cảm biến
 ```
 
 Không dùng phương án pin 1S → AMS1117-3.3 V; không cấp pin 3,7–4,2 V trực tiếp vào chân 3V3. Phải kiểm tra cách cấp nguồn của đúng bo mua về, tránh cấp USB và nguồn ngoài đồng thời khi chưa có cách ly phù hợp.
@@ -82,9 +86,9 @@ Không dùng phương án pin 1S → AMS1117-3.3 V; không cấp pin 3,7–4,2 V
 | Thời lượng pin | Mong muốn ≥24 giờ; dung lượng chốt sau đo dòng | Chưa đo |
 | Phát hiện offline | Mục tiêu ≤15 giây; đo riêng LWT và timeout heartbeat | Chưa đo |
 
-Pin 400 mAh chạy 24 giờ đòi hỏi dòng trung bình lý tưởng ≤16,7 mA trước tổn hao/dung lượng dự phòng; chưa có phép đo chứng minh DevKit đạt được. Không suy ra thời lượng thực từ dòng deep sleep khi thiết bị cần lấy mẫu liên tục.
+Pin 400 mAh chạy 24 giờ đòi hỏi dòng trung bình lý tưởng ≤16,7 mA trước tổn hao/dung lượng dự phòng; chưa có phép đo chứng minh D1 mini đạt được. Không suy ra thời lượng thực từ dòng deep sleep khi thiết bị cần lấy mẫu liên tục.
 
-Các báo cáo [pin](docs/BATTERY_BENCHMARK_REPORT.md), [hạ tầng](docs/INFRA_TEST_REPORT.md) và [50 ca thử](docs/TEST_CASES_50_FALLS.md) là mẫu ghi nhận. Các tệp hardware_schematic.png/.pdf, ui_wireframe.png và LATENCY_TEST_RESULTS.xlsx hiện rỗng, chưa dùng làm bằng chứng. Xem [quy trình đo độ trễ](docs/LATENCY_TEST_PLAN.md).
+Các báo cáo [pin](docs/BATTERY_BENCHMARK_REPORT.md), [hạ tầng](docs/INFRA_TEST_REPORT.md) và [50 ca thử](docs/TEST_CASES_50_FALLS.md) là mẫu ghi nhận. Sơ đồ hardware_schematic.png/.pdf là bản thiết kế Rev C, chưa chứng minh mạch thật đã chạy. ui_wireframe.png và LATENCY_TEST_RESULTS.xlsx chưa dùng làm bằng chứng. Xem [quy trình đo độ trễ](docs/LATENCY_TEST_PLAN.md).
 
 ## 5. Thiết lập môi trường phát triển
 
@@ -93,6 +97,8 @@ Yêu cầu: Node.js 22, Docker Desktop đang chạy Linux containers. Chạy cá
 ```powershell
 Copy-Item .env.example .env
 ```
+
+Các ID `esp32_001`/`esp32_002` trong ví dụ và kiểm thử là định danh MQTT đã dùng trước khi đổi bo; dùng được cho ESP8266. Giữ nguyên nếu đã cấp tài khoản. Nếu chọn ID mới, cấp username/password và dùng thống nhất trong firmware/topic/CSDL; không chỉ đổi tên trong payload.
 
 Đặt POSTGRES_PASSWORD và MQTT_PASSWORD riêng trong .env. Backend đọc .env ở gốc repo; Compose dùng POSTGRES_* để khởi tạo PostgreSQL.
 
@@ -133,13 +139,13 @@ SP1-BE-02 có hai khung route `GET /api/devices` và `GET /api/events`: trả HT
 
 Đã có bài nghiệm thu riêng `npm run test:mosquitto` dùng broker thật, không mock. Bài này **dừng/khởi động lại service Mosquitto local**; chỉ chạy với broker thử nghiệm ở `127.0.0.1`, đủ hai tài khoản thiết bị thật theo `.env.example`. Xem [kết quả và cách chạy nghiệm thu MQTT local](docs/VALIDATION.md#nghiệm-thu-mosquitto-thật-local--28102026).
 
-Khi gắn ESP32 qua LAN, dùng [hướng dẫn TLS](docs/DEPLOYMENT.md) và Compose override; chưa mở API ra ngoài cho đến khi có xác thực/phân quyền. Chứng chỉ có sẵn trong repo là placeholder.
+Khi gắn ESP8266 qua LAN, dùng [hướng dẫn TLS](docs/DEPLOYMENT.md) và Compose override; chưa mở API ra ngoài cho đến khi có xác thực/phân quyền. Chứng chỉ có sẵn trong repo là placeholder.
 
 ## 6. Phân công và kế hoạch
 
 | Thành viên | Phụ trách | Nhánh chuyên trách |
 |---|---|---|
-| Phạm Việt Tiến | Firmware, cảm biến, nguồn và phép đo pin | feat/firmware-esp32 |
+| Phạm Việt Tiến | Firmware, cảm biến, nguồn và phép đo pin | feat/firmware-esp8266 |
 | Trần Đình Nam | Broker, PostgreSQL, TLS và kiểm thử hạ tầng | feat/iot-infra-broker |
 | Nguyễn Hữu Chính | Backend, API, Socket.io và webhook | feat/backend-server |
 | Đỗ Hải Đăng | Dashboard, simulator và tổng hợp kết quả thử | feat/frontend-dashboard |

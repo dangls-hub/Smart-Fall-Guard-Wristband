@@ -4,7 +4,7 @@
 * **Thời gian thực hiện:** Tuần 4 (Từ ngày 22/11/2026 đến 30/11/2026)
 * **Trạng thái:** Kế hoạch thực hiện
 
-> Cập nhật thiết kế 26/10/2026: đây là kế hoạch, chưa có kết quả nghiệm thu. Tham chiếu `docs/ARCHITECTURE_REVIEW.md`, `docs/HARDWARE_BOM.md` và `docs/LATENCY_TEST_PLAN.md`. Chỉ đánh dấu hoàn thành khi có bằng chứng.
+> Cập nhật phần cứng 10/11/2026: dùng D1 mini ESP8266/ESP-12F theo linh kiện đã mua; đây là kế hoạch, chưa có kết quả nghiệm thu. Tham chiếu `docs/ARCHITECTURE_REVIEW.md`, `docs/HARDWARE_BOM.md` và `docs/LATENCY_TEST_PLAN.md`. Chỉ đánh dấu hoàn thành khi có bằng chứng.
 
 ---
 
@@ -62,8 +62,8 @@ Kiểm tra khả năng phân biệt và chống báo giả của thuật toán:
 * **Task ID: SP4-HW-02**
   * **Nhiệm vụ:** Viết nội dung Chương 1 và Chương 3 trong Báo cáo BTL.
   * **Các bước thực hiện:**
-    1. Soạn thảo Chương 1: Giới thiệu đề tài, khảo sát nhu cầu, phân tích ưu nhược điểm phần cứng ESP32 và cảm biến MPU6050.
-    2. Soạn thảo Chương 3: Sơ đồ nguyên lý chi tiết, giải thuật toán nhận diện ngã 4 giai đoạn, lưu đồ thuật toán và cơ chế lưu trữ SPIFFS.
+    1. Soạn thảo Chương 1: Giới thiệu đề tài, khảo sát nhu cầu, phân tích ưu nhược điểm phần cứng ESP8266 và cảm biến MPU6050.
+    2. Soạn thảo Chương 3: Sơ đồ nguyên lý chi tiết, giải thuật toán nhận diện ngã 4 giai đoạn, lưu đồ thuật toán và cơ chế lưu trữ LittleFS.
   * **File bàn giao:** Chương 1 & Chương 3 trong file Báo cáo Word.
   * **Thời gian:** 26/11/2026 – 28/11/2026 (12 giờ làm việc).
 
@@ -75,7 +75,7 @@ Kiểm tra khả năng phân biệt và chống báo giả của thuật toán:
   * **Các bước thực hiện:**
     1. Sử dụng công cụ `jmeter` hoặc script giả lập 50 thiết bị kết nối đồng thời vào Mosquitto Broker để đo tải CPU/RAM trên máy chủ.
     2. Thực hiện 10 lần rút nguồn đột ngột thiết bị để bấm giờ xem sau bao nhiêu giây hệ thống phát hiện trạng thái `OFFLINE` (Yêu cầu $\le 15s$).
-    3. Thực hiện ngắt router Wi-Fi 5 phút, cho thiết bị phát hiện ngã, sau đó bật lại router để ghi nhận tỷ lệ gửi bù dữ liệu từ SPIFFS lên CSDL (Yêu cầu $100\%$).
+    3. Thực hiện ngắt router Wi-Fi 5 phút, cho thiết bị phát hiện ngã, sau đó bật lại router để ghi nhận tỷ lệ gửi bù dữ liệu từ LittleFS lên CSDL (Yêu cầu $100\%$).
   * **File bàn giao:** `docs/INFRA_TEST_REPORT.md`.
   * **Thời gian:** 22/11/2026 – 25/11/2026 (14 giờ làm việc).
 
@@ -97,7 +97,7 @@ Kiểm tra khả năng phân biệt và chống báo giả của thuật toán:
        * Điểm A0: lúc va chạm; điểm A1: chuyển CONFIRMED_FALL sau thời gian bất động và chờ hủy.
        * Điểm B: Lúc gói tin MQTT đến Backend Server.
        * Điểm C: Lúc Client Web nhận được WebSocket và render ra màn hình.
-    2. Đo trên 30 lần kích hoạt để tính toán: A1→C trung bình/p95/tối đa (mục tiêu ≤2000ms); ghi riêng A0→C và sai số đồng bộ đồng hồ. Không trừ uptime ESP32 với timestamp server.
+    2. Đo trên 30 lần kích hoạt để tính toán: A1→C trung bình/p95/tối đa (mục tiêu ≤2000ms); ghi riêng A0→C và sai số đồng bộ đồng hồ. Không trừ uptime ESP8266 với timestamp server.
     3. Cập nhật hoàn chỉnh tài liệu Postman Collection và `API_DOCUMENTATION.md`.
   * **File bàn giao:** `docs/LATENCY_TEST_RESULTS.xlsx`, `docs/API_DOCUMENTATION.md`.
   * **Thời gian:** 22/11/2026 – 25/11/2026 (12 giờ làm việc).
@@ -154,7 +154,7 @@ Kiểm tra khả năng phân biệt và chống báo giả của thuật toán:
 2. 📊 **Bộ Slide bảo vệ đồ án:** `IOT_BTL_Slide_Nhom4_GEHIHI.pptx` (20–25 slide).
 3. 🎥 **Video Demo Vận hành thực tế:** `demo_video.mp4` (Thời lượng 3–5 phút, có thuyết minh).
 4. 💻 **Mã nguồn đóng gói hoàn chỉnh (GitHub Repository):**
-   * Thư mục `firmware/`: Mã nguồn nạp vi điều khiển ESP32.
+   * Thư mục `firmware/`: Mã nguồn nạp vi điều khiển ESP8266.
    * Thư mục `broker/`: Cấu hình Mosquitto và chứng chỉ TLS.
    * Thư mục `backend/`: Mã nguồn Node.js Express & WebSocket.
    * Thư mục `frontend/`: Mã nguồn React + Vite Dashboard & Virtual Simulator.

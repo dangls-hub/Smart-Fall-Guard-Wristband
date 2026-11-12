@@ -1,9 +1,9 @@
-"""Check SP1-HW-01 connectivity in the editable EasyEDA Rev B source."""
+"""Check SP1-HW-01 connectivity in the editable EasyEDA Rev C source."""
 import json
 from pathlib import Path
 
 folder = Path(__file__).resolve().parent
-document = json.loads((folder / 'SmartFallGuard_RevB.json').read_text(encoding='utf-8'))
+document = json.loads((folder / 'SmartFallGuard_RevC.json').read_text(encoding='utf-8'))
 pins, labels, segments, points = {}, [], [], set()
 references = set()
 for sheet_index, schematic in enumerate(document['schematics']):
@@ -71,12 +71,12 @@ expected = {
     'CHG_SYS': {'U3.OUT', 'SW2.1'},
     'REG_IN': {'SW2.2', 'U4.VIN', 'U4.EN'},
     'REG_3V3': {'U4.VOUT', 'JP1.1'},
-    'SDA': {'U1.21', 'U2.4', 'R4.2'},
-    'SCL': {'U1.22', 'U2.3', 'R5.1'},
-    'CANCEL': {'U1.18', 'SW1.1'},
-    'LED_CTRL': {'U1.23', 'R3.1'},
+    'SDA': {'U1.4', 'U2.4', 'R4.2'},
+    'SCL': {'U1.5', 'U2.3', 'R5.1'},
+    'CANCEL': {'U1.14', 'SW1.1'},
+    'LED_CTRL': {'U1.13', 'R3.1'},
     'LED_ANODE': {'R3.2', 'D1.A'},
-    'BUZZER_CTRL': {'U1.19', 'R1.1'},
+    'BUZZER_CTRL': {'U1.12', 'R1.1'},
     'Q1_BASE': {'R1.2', 'Q1.B', 'R2.1'},
     'Q1_COLLECTOR': {'BZ1.-', 'Q1.C'},
     'NC_U2_XDA': {'U2.5'},
@@ -90,4 +90,4 @@ for name, wanted in expected.items():
         assert groups[root(named[name])] == wanted, f'Incorrect label: {name}'
 assert len(groups) == len(expected), 'Unexpected isolated pins or extra nets'
 print(f'PASS: {len(document["schematics"])} sheets, {len(references)} symbols, '
-      f'{len(pins)} pins and {len(groups)} nets match SP1-HW-01 Rev B.')
+      f'{len(pins)} pins and {len(groups)} nets match SP1-HW-01 Rev C.')
