@@ -1,14 +1,15 @@
 # Linh kiện cần mua và đấu nối prototype
 
-Danh sách phục vụ prototype thiết bị đeo cổ tay Smart Fall Guard. Sơ đồ nguyên lý cập nhật lưu tại `docs/hardware_schematic.pdf` và `docs/hardware_schematic.png` (nguồn thiết kế EasyEDA tại `docs/hardware/SmartFallGuard_RevB.json`).
+Danh sách phục vụ prototype Wemos D1 mini ESP8266. Dùng [sơ đồ và bảng chân hiện hành](hardware/README.md), nguồn [EasyEDA Rev B](hardware/SmartFallGuard_RevB.json) và [hướng dẫn nạp chương trình thử](../firmware/README.md). Số lượng là kế hoạch, chưa có bảng đối chiếu thực mua hoặc đơn giá.
 
 ## Giai đoạn 1: Chạy nguồn USB (Test cảm biến & Wi-Fi)
 
 | Linh kiện | Số lượng | Yêu cầu kỹ thuật |
 |---|---:|---|
-| ESP8266 Wemos D1 Mini | 1 chính + 1 dự phòng | Mức logic 3,3 V; kiểm tra sẵn driver USB-UART (CH340) |
+| ESP8266 Wemos D1 Mini | 1 chính + 1 dự phòng | Mức logic 3,3 V; xác định chip USB-UART, flash và regulator của bo thực tế |
 | MPU6050 breakout I²C (GY-521) | 1 chính + 1 dự phòng | Cấp nguồn 3,3 V (hoặc 5 V nếu qua LDO trên module); mức logic I²C 3,3 V |
 | Buzzer piezo thụ động 3,3 V | 1 | Hỗ trợ phát xung PWM ~2 kHz |
+| Driver còi NPN + điện trở | 1 bộ | Theo JSON: Q1, R1 1 kΩ, R2 10 kΩ; kiểm tra B/C/E và dòng tải |
 | Nút nhấn thường hở (Tactile switch) | 2 | Một nút hủy cảnh báo (SOS/Cancel), một nút dự phòng |
 | LED đỏ + điện trở 330 Ω–1 kΩ | 2 bộ | Nối tiếp hạn dòng bảo vệ chân GPIO |
 | Breadboard, dây jumper, pin header | 1 bộ | Dây I²C ngắn (< 15 cm), nối đất (GND) chung |
@@ -23,7 +24,7 @@ Danh sách phục vụ prototype thiết bị đeo cổ tay Smart Fall Guard. S�
 ### Quy tắc đấu nối Giai đoạn 1
 - Nút nhấn nối giữa `D6` (GPIO12) và `GND`, cấu hình `INPUT_PULLUP` và xử lý chống dội (debounce) trong firmware.
 - LED ngoài phải mắc nối tiếp điện trở hạn dòng `330 Ω – 1 kΩ` từ `D7` về `GND`.
-- Buzzer thụ động nối chân tín hiệu vào `D5` (nếu dùng buzzer công suất lớn hoặc còi từ, cần thêm transistor kích low-side và diode dập xung).
+- Theo sơ đồ JSON, `D5` qua R1 1 kΩ điều khiển transistor Q1, không cấp tải còi trực tiếp từ GPIO. Nếu đổi sang còi từ, phải chọn lại driver và diode dập xung theo tải.
 - Mọi chân `GND` của Wemos D1 Mini, MPU6050 và ngoại vi phải nối chung.
 
 ---
@@ -36,20 +37,20 @@ Danh sách phục vụ prototype thiết bị đeo cổ tay Smart Fall Guard. S�
 | Module sạc TP4056 (loại có IC bảo vệ DW01A + 8205A) | 1–2 | **Bắt buộc thay điện trở `Rprog` (chân 2 TP4056)** từ `1,2 kΩ` (1000 mA) sang **`4,7 kΩ`** (~250 mA) hoặc **`5,1 kΩ`** (~230 mA) để tránh làm phồng/hỏng pin 300 mAh |
 | Module ổn áp 3,3 V (Buck-Boost TPS63070) *(Tùy chọn tối ưu)* | 1 | Duy trì áp 3,3 V ổn định khi pin giảm từ 4,2 V xuống 3,0 V và chịu được xung dòng ~300 mA khi ESP8266 phát Wi-Fi |
 | Công tắc gạt (Toggle switch) + đầu nối pin | 1 bộ | Ngắt hoàn toàn nguồn pin khi cắm cáp USB vào Wemos D1 Mini để nạp code/debug |
-| Điện trở đo áp pin (`100 kΩ`) | 1 | Wemos D1 Mini có sẵn cầu chia áp `220 kΩ / 100 kΩ` trên chân `A0` (dải 0–3,3 V); nối thêm `100 kΩ` nối tiếp từ `B+` vào `A0` để mở rộng dải đo lên `4,2 V` |
+| Điện trở đo áp pin (`100 kΩ`) | 1 | JSON dùng R6 từ B+ đến A0, giả định bo có cầu chia áp 220 kΩ/100 kΩ. Phải kiểm tra đúng bo và giới hạn A0 trước khi nối; bo LOLIN tham chiếu công bố tối đa 3,2 V tại A0 |
 | Tụ lọc nguồn (100 µF + 100 nF) | 1 bộ | Đặt sát chân nguồn `3V3`/`5V` và `GND` của Wemos D1 Mini để chống sụt áp tức thời khi truyền gói tin MQTT |
 | Vỏ cách điện + dây đeo cổ tay | 1 bộ | Cố định chắc chắn cảm biến MPU6050 theo trục tọa độ chuẩn, chừa khe cắm sạc TP4056 và nút bấm hủy |
 
 ### Kiến trúc đường nguồn & Cảnh báo an toàn
 1. **Sơ đồ cấp nguồn:**
    - **Phương án 1 (Tối ưu dung lượng pin):** `Cổng sạc TP4056 ↔ Pin 300 mAh (B+/B-) → OUT+/OUT- → Công tắc gạt → Buck-Boost 3,3 V → chân 3V3 của Wemos D1 Mini + VCC MPU6050`.
-   - **Phương án 2 (Tối giản linh kiện cho prototype):** `OUT+ TP4056 → Công tắc gạt → chân 5V của Wemos D1 Mini` (tận dụng LDO ME6211 3,3 V có sẵn trên bo; lưu ý mạch sẽ sụt áp và tự reset sớm khi pin xuống dưới ~3,5–3,6 V lúc phát Wi-Fi).
+   - **Phương án 2 (đang vẽ trong JSON):** `OUT+ TP4056 → Công tắc gạt → JP1 → chân 5V của Wemos D1 Mini`. Sơ đồ giả định LDO ME6211 trên bo; cần kiểm tra regulator thực tế và đo sụt áp/reset khi pin giảm. Phương án TPS63070 chưa được vẽ trong JSON, phải cập nhật sơ đồ và validator nếu chọn.
 2. **Hạn chế của TP4056 (Không có Power Path):**
    - Mạch TP4056 không có tính năng chia tải (power path). Khi sạc pin, **gạt công tắc sang OFF** để ngắt tải ESP8266; nếu vừa sạc vừa bật Wi-Fi, dòng tiêu thụ của ESP8266 sẽ làm IC TP4056 hiểu nhầm dòng sạc và không tự ngắt khi pin đầy 4,2 V.
 3. **Cách ly khi nạp code qua USB:**
    - **Tuyệt đối tắt công tắc pin** trước khi cắm cáp USB trực tiếp vào cổng của Wemos D1 Mini để tránh xung đột nguồn giữa cổng USB máy tính và ngõ ra `OUT+` của TP4056.
 4. **Dự toán thời lượng pin 300 mAh:**
-   - Ở chế độ Wi-Fi hoạt động liên tục (~75–85 mA trung bình, xung đỉnh ~300 mA), pin `300 mAh` vận hành được khoảng **3 – 3,5 giờ**. Để kéo dài thời gian đeo thực tế ở các giai đoạn sau, cần bật chế độ tiết kiệm năng lượng (`WiFi.setSleepMode(WIFI_MODEM_SLEEP)`).
+   - Ước tính **3–3,5 giờ** dựa trên giả định Wi-Fi hoạt động liên tục (~75–85 mA trung bình, xung đỉnh ~300 mA); chưa có số đo trên bo. Phải đo dòng và thời lượng thực tế trước khi kết luận. Nếu thử `WiFi.setSleepMode(WIFI_MODEM_SLEEP)`, cần đo lại chu kỳ lấy mẫu và độ trễ; không suy ra thiết bị đã đạt mục tiêu 24 giờ.
 
 ---
 
