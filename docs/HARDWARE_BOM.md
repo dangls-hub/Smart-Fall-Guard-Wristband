@@ -1,50 +1,60 @@
 # Linh kiện cần mua và đấu nối prototype
 
-Danh sách phục vụ một prototype cổ tay. Sơ đồ Rev B đã có tại `docs/hardware_schematic.pdf` và `docs/hardware_schematic.png`; vẫn phải chốt mã bo/module cụ thể và đối chiếu pinout trước khi đặt mua. Không có giá/tồn kho đã xác minh.
+Danh sách phục vụ prototype thiết bị đeo cổ tay Smart Fall Guard. Sơ đồ nguyên lý cập nhật lưu tại `docs/hardware_schematic.pdf` và `docs/hardware_schematic.png` (nguồn thiết kế EasyEDA tại `docs/hardware/SmartFallGuard_RevB.json`).
 
-## Giai đoạn 1: chạy USB
+## Giai đoạn 1: Chạy nguồn USB (Test cảm biến & Wi-Fi)
 
-| Linh kiện | Số lượng | Yêu cầu khi mua |
+| Linh kiện | Số lượng | Yêu cầu kỹ thuật |
 |---|---:|---|
-| ESP32 DevKitC / DevKit dùng ESP32-WROOM-32E | 1 chính + 1 dự phòng tùy ngân sách | Có GPIO18,19,21,22,23; có sơ đồ nguồn và USB-UART |
-| MPU6050 breakout I²C | 1 chính + 1 dự phòng tùy ngân sách | Xác minh cấp nguồn và mức logic 3,3 V; kiểm tra pull-up/regulator của đúng module |
-| Buzzer piezo thụ động 3,3 V | 1 | Phù hợp PWM 2 kHz; biết dòng và điện áp định mức |
-| Transistor/MOSFET điều khiển buzzer | 1 bộ | Chọn theo tải và drive GPIO 3,3 V; có điện trở base/gate, pull-down khi cần |
-| Nút nhấn thường hở | 2 | Một nút hủy, một dự phòng; dễ thao tác khi đeo |
-| LED đỏ + điện trở 330 Ω–1 kΩ | 2 bộ | Chọn theo điện áp LED và dòng mong muốn |
-| Breadboard, dây jumper, pin header | 1 bộ | Dây I²C ngắn, nối đất chung |
-| Cáp USB truyền dữ liệu | 1–2 | Đúng loại cổng của bo, không chỉ hỗ trợ sạc |
-| Máy tính và Wi-Fi 2,4 GHz | Dùng sẵn | Máy chạy Docker/Node.js; có Internet nếu gửi Telegram/email |
-| Đồng hồ vạn năng | 1 | Đo nguồn/cực tính; đo dòng nối tiếp ở đúng thang/cổng |
+| ESP8266 Wemos D1 Mini | 1 chính + 1 dự phòng | Mức logic 3,3 V; kiểm tra sẵn driver USB-UART (CH340) |
+| MPU6050 breakout I²C (GY-521) | 1 chính + 1 dự phòng | Cấp nguồn 3,3 V (hoặc 5 V nếu qua LDO trên module); mức logic I²C 3,3 V |
+| Buzzer piezo thụ động 3,3 V | 1 | Hỗ trợ phát xung PWM ~2 kHz |
+| Nút nhấn thường hở (Tactile switch) | 2 | Một nút hủy cảnh báo (SOS/Cancel), một nút dự phòng |
+| LED đỏ + điện trở 330 Ω–1 kΩ | 2 bộ | Nối tiếp hạn dòng bảo vệ chân GPIO |
+| Breadboard, dây jumper, pin header | 1 bộ | Dây I²C ngắn (< 15 cm), nối đất (GND) chung |
+| Cáp USB truyền dữ liệu | 1–2 | Cáp có đường dữ liệu D+/D- để nạp firmware, không dùng cáp chỉ sạc |
+| Máy tính và Wi-Fi 2,4 GHz | Dùng sẵn | ESP8266 chỉ hỗ trợ băng tần Wi-Fi 2,4 GHz; máy chạy Mosquitto/Node.js/PostgreSQL |
 
-Chân đề xuất: SDA=21, SCL=22, nút hủy=18, điều khiển buzzer=19, LED ngoài=23. Chọn GPIO23 để tránh thêm tải ngoài vào chân boot strap GPIO2.
+### Quy hoạch sơ đồ chân (Pinout Wemos D1 Mini)
+- **I²C MPU6050:** `D2` (GPIO4) = **SDA**, `D1` (GPIO5) = **SCL**.
+- **Ngoại vi:** `D5` (GPIO14) = **Buzzer** (PWM), `D6` (GPIO12) = **Nút hủy cảnh báo**, `D7` (GPIO13) = **LED ngoài**.
+- **Lý do chọn chân:** Tránh hoàn toàn các chân boot-strap nhạy cảm của ESP8266 (`D3`/GPIO0, `D4`/GPIO2, `D8`/GPIO15) để đảm bảo mạch khởi động và nạp code ổn định, không bị treo khi có tải ngoài.
 
-Nút nối GPIO18 với GND, INPUT_PULLUP và debounce. LED phải nối tiếp điện trở. Buzzer đi qua driver low-side; nếu đổi sang còi điện từ/motor, bổ sung diode dập xung theo tải. Mọi GND nối chung. Kiểm tra pull-up I²C lên 3,3 V, không lên 5 V.
+### Quy tắc đấu nối Giai đoạn 1
+- Nút nhấn nối giữa `D6` (GPIO12) và `GND`, cấu hình `INPUT_PULLUP` và xử lý chống dội (debounce) trong firmware.
+- LED ngoài phải mắc nối tiếp điện trở hạn dòng `330 Ω – 1 kΩ` từ `D7` về `GND`.
+- Buzzer thụ động nối chân tín hiệu vào `D5` (nếu dùng buzzer công suất lớn hoặc còi từ, cần thêm transistor kích low-side và diode dập xung).
+- Mọi chân `GND` của Wemos D1 Mini, MPU6050 và ngoại vi phải nối chung.
 
-## Giai đoạn 2: pin và vỏ đeo
+---
 
-| Linh kiện | Số lượng | Tiêu chí |
+## Giai đoạn 2: Chạy pin Li-Po 300 mAh và đóng gói
+
+| Linh kiện | Số lượng | Tiêu chí & Lưu ý kỹ thuật |
 |---|---:|---|
-| Pin Li-Po 1S có bảo vệ | 1–2 | Chọn kích thước/dung lượng sau đo dòng; có thông số dòng xả và dòng sạc, đúng cực đầu nối; cấu hình hiện giới hạn tối đa 500 mA và phải giảm nếu pin không cho phép |
-| Module sạc có power path, ví dụ BQ24074 | 1 | Đặt dòng sạc phù hợp viên pin; pin bảo vệ và power path là hai chức năng riêng |
-| Module buck-boost 3,3 V, ví dụ dựa trên TPS63070 | 1 | Dải vào bao phủ pin và đầu ra SYS mạch sạc; xác minh dòng đầu ra thực ≥500 mA ở toàn dải dùng và đáp ứng tải Wi-Fi |
-| Công tắc, đầu nối pin và dây phù hợp | 1 bộ | Có cách ngắt nguồn khi nạp/debug, tránh cắm ngược |
-| Mạch đo pin | 1 | Cầu chia áp phù hợp ADC1 hoặc fuel gauge; không nối pin 4,2 V thẳng vào ADC |
-| Tụ decoupling/bulk | Theo sơ đồ module | Theo datasheet mạch nguồn và phép đo sụt áp thực |
-| Thiết bị ghi dòng/power analyzer | Mượn hoặc mua 1 | Đo trung bình và xung; USB meter không đại diện hoàn toàn cho hiệu suất khi chạy pin |
-| Vỏ cách điện + dây đeo + PCB hàn | 1 bộ | Cố định cảm biến, che chân dẫn điện, chừa anten và tiếp cận nút hủy |
+| Pin Li-Po 1S 3,7 V – 300 mAh (có mạch bảo vệ BMS) | 1–2 | Dòng sạc an toàn ≤ 0,5C–1C (150 mA – 300 mA); kiểm tra đúng cực `+/-` trước khi hàn |
+| Module sạc TP4056 (loại có IC bảo vệ DW01A + 8205A) | 1–2 | **Bắt buộc thay điện trở `Rprog` (chân 2 TP4056)** từ `1,2 kΩ` (1000 mA) sang **`4,7 kΩ`** (~250 mA) hoặc **`5,1 kΩ`** (~230 mA) để tránh làm phồng/hỏng pin 300 mAh |
+| Module ổn áp 3,3 V (Buck-Boost TPS63070) *(Tùy chọn tối ưu)* | 1 | Duy trì áp 3,3 V ổn định khi pin giảm từ 4,2 V xuống 3,0 V và chịu được xung dòng ~300 mA khi ESP8266 phát Wi-Fi |
+| Công tắc gạt (Toggle switch) + đầu nối pin | 1 bộ | Ngắt hoàn toàn nguồn pin khi cắm cáp USB vào Wemos D1 Mini để nạp code/debug |
+| Điện trở đo áp pin (`100 kΩ`) | 1 | Wemos D1 Mini có sẵn cầu chia áp `220 kΩ / 100 kΩ` trên chân `A0` (dải 0–3,3 V); nối thêm `100 kΩ` nối tiếp từ `B+` vào `A0` để mở rộng dải đo lên `4,2 V` |
+| Tụ lọc nguồn (100 µF + 100 nF) | 1 bộ | Đặt sát chân nguồn `3V3`/`5V` và `GND` của Wemos D1 Mini để chống sụt áp tức thời khi truyền gói tin MQTT |
+| Vỏ cách điện + dây đeo cổ tay | 1 bộ | Cố định chắc chắn cảm biến MPU6050 theo trục tọa độ chuẩn, chừa khe cắm sạc TP4056 và nút bấm hủy |
 
-Đường nguồn Rev B: USB → charger power path ↔ pin; SYS → công tắc → buck-boost 3,3 V → jumper JP1 → ESP32 + IMU. Không cấp SYS của charger trực tiếp vào chân 3V3 vì có thể vượt 3,3 V. Tắt công tắc và mở JP1 trước khi cắm USB của DevKit.
+### Kiến trúc đường nguồn & Cảnh báo an toàn
+1. **Sơ đồ cấp nguồn:**
+   - **Phương án 1 (Tối ưu dung lượng pin):** `Cổng sạc TP4056 ↔ Pin 300 mAh (B+/B-) → OUT+/OUT- → Công tắc gạt → Buck-Boost 3,3 V → chân 3V3 của Wemos D1 Mini + VCC MPU6050`.
+   - **Phương án 2 (Tối giản linh kiện cho prototype):** `OUT+ TP4056 → Công tắc gạt → chân 5V của Wemos D1 Mini` (tận dụng LDO ME6211 3,3 V có sẵn trên bo; lưu ý mạch sẽ sụt áp và tự reset sớm khi pin xuống dưới ~3,5–3,6 V lúc phát Wi-Fi).
+2. **Hạn chế của TP4056 (Không có Power Path):**
+   - Mạch TP4056 không có tính năng chia tải (power path). Khi sạc pin, **gạt công tắc sang OFF** để ngắt tải ESP8266; nếu vừa sạc vừa bật Wi-Fi, dòng tiêu thụ của ESP8266 sẽ làm IC TP4056 hiểu nhầm dòng sạc và không tự ngắt khi pin đầy 4,2 V.
+3. **Cách ly khi nạp code qua USB:**
+   - **Tuyệt đối tắt công tắc pin** trước khi cắm cáp USB trực tiếp vào cổng của Wemos D1 Mini để tránh xung đột nguồn giữa cổng USB máy tính và ngõ ra `OUT+` của TP4056.
+4. **Dự toán thời lượng pin 300 mAh:**
+   - Ở chế độ Wi-Fi hoạt động liên tục (~75–85 mA trung bình, xung đỉnh ~300 mA), pin `300 mAh` vận hành được khoảng **3 – 3,5 giờ**. Để kéo dài thời gian đeo thực tế ở các giai đoạn sau, cần bật chế độ tiết kiệm năng lượng (`WiFi.setSleepMode(WIFI_MODEM_SLEEP)`).
 
-Không dùng Li-Po 1S → AMS1117-3.3 V: thiếu headroom khi điện áp pin giảm. TP4056 đơn thuần không thay thế chức năng power path; module có bảo vệ pin chưa chắc có chia nguồn tải/sạc. Cần kiểm tra đúng module thay vì chỉ tên IC.
+---
 
-DevKit là bo thử cồng kềnh, có LED và USB-UART làm tăng tiêu thụ. Chỉ thu nhỏ bo hoặc đổi dòng MCU sau khi đã có phép đo và danh sách GPIO/phần mềm tương thích. Pin 400 mAh không mặc nhiên chạy 24 giờ.
-
-Không nối đồng thời USB của DevKit và nguồn ngoài khi chưa xác minh mạch cách ly của bo. Với DevKitC, tài liệu Espressif yêu cầu chọn một trong USB/5V/3V3.
-
-## Tài liệu để đối chiếu trước khi mua
-
-- [ESP32 DevKitC và tùy chọn cấp nguồn](https://docs.espressif.com/projects/esp-dev-kits/en/latest/esp32/esp32-devkitc/user_guide.html).
-- [MPU6050 product specification](https://invensense.tdk.com/wp-content/uploads/2015/02/MPU-6000-Datasheet.pdf).
-- [BQ24074: sạc một cell và power path](https://www.ti.com/lit/ds/symlink/bq24074.pdf).
-- [TPS63070: buck-boost](https://www.ti.com/lit/ds/symlink/tps63070.pdf).
+## Tài liệu tham chiếu kỹ thuật
+- [ESP8266 Wemos D1 Mini Pinout & Schematic](https://www.wemos.cc/en/latest/d1/d1_mini.html)
+- [TP4056 Datasheet (Bảng tính dòng sạc theo điện trở Rprog)](https://dlnmh9ip6v2uc.cloudfront.net/datasheets/Prototyping/TP4056.pdf)
+- [MPU6050 Product Specification](https://invensense.tdk.com/wp-content/uploads/2015/02/MPU-6000-Datasheet.pdf)
+- [TPS63070 Buck-Boost Converter Datasheet](https://www.ti.com/lit/ds/symlink/tps63070.pdf)
