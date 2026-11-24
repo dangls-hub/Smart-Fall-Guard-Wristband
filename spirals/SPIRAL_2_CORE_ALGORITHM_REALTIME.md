@@ -2,7 +2,7 @@
 * **Dự án:** Vòng tay thông minh cảnh báo té ngã (Smart Fall-Guard Wristband)
 * **Nhóm thực hiện:** Nhóm 4 – GEHIHI
 * **Thời gian thực hiện:** Tuần 2 (Từ ngày 08/11/2026 đến 14/11/2026)
-* **Trạng thái:** Kế hoạch thực hiện
+* **Trạng thái 24/11/2026:** Đã triển khai và kiểm thử cục bộ hai đầu việc hạ tầng của Nam. Chưa nghiệm thu toàn Spiral 2.
 
 > Cập nhật thiết kế 26/10/2026: đây là kế hoạch, chưa có kết quả nghiệm thu. Tham chiếu `docs/ARCHITECTURE_REVIEW.md`, `docs/HARDWARE_BOM.md` và `docs/LATENCY_TEST_PLAN.md`. Chỉ đánh dấu hoàn thành khi có bằng chứng.
 
@@ -54,18 +54,20 @@
 
 ### ☁️ 2. Trần Đình Nam – IoT Infrastructure & Cloud Lead
 * **Task ID: SP2-INF-01**
+  * **Tiến độ:** Provision chứng chỉ theo máy chủ và kiểm thử Mosquitto TLS/ACL cục bộ. Xem `docs/DEPLOYMENT.md` và `docs/INFRA_TEST_REPORT.md`.
   * **Nhiệm vụ:** Cấu hình bảo mật MQTT Broker qua TLS/SSL (Port 8883) & Quản lý User/Password.
   * **Các bước thực hiện:**
     1. Tạo khóa và chứng chỉ bảo mật tự ký (Self-signed CA, Server Certificate, Server Key) bằng OpenSSL.
     2. Dùng broker/mosquitto.tls.conf và docker-compose.tls.yml, tạo chứng chỉ có SAN khớp host/IP; xác minh CA/hostname, không tắt kiểm tra TLS.
     3. Mỗi thiết bị dùng username bằng device_id; chỉ publish telemetry/alert/status/sync/command_ack và đọc commands/event_ack trong nhánh của mình.
-  * **File bàn giao:** `certs/ca.crt`, `certs/server.crt`, `broker/mosquitto.conf`, `broker/acl.conf`.
+  * **File bàn giao:** `scripts/provision-mqtt-tls.sh`, `scripts/check-mqtt-tls.cjs`, `docker-compose.tls.yml`, `broker/acl.conf`. Chứng chỉ và khóa được tạo cục bộ khi triển khai.
   * **Thời gian:** 08/11/2026 – 10/11/2026 (12 giờ làm việc).
 
 * **Task ID: SP2-INF-02**
+  * **Tiến độ:** Backend ghi nhận ONLINE qua MQTT, cập nhật PostgreSQL và quét OFFLINE khi bật `HEARTBEAT_ENABLED=true`. Lượt đo local với Mosquitto TLS thật là 19,706 giây từ heartbeat cuối. Chưa đo trên bo.
   * **Nhiệm vụ:** Xây dựng script kiểm tra Heartbeat định kỳ của thiết bị.
   * **Các bước thực hiện:**
-    1. Triển khai heartbeat timer trong backend; chưa chạy daemon riêng. File services/heartbeat_daemon.js hiện chỉ là placeholder.
+    1. Chạy timer heartbeat trong backend. Xử lý bản tin ONLINE mới và đối chiếu ID theo đặc tả MQTT.
     2. Cứ mỗi 5s truy vấn bảng `devices` kiểm tra trường `last_seen`.
     3. Nếu thời gian hiện tại trừ `last_seen` vượt quá 15 giây $\rightarrow$ Ghi log thiết bị mất kết nối và chuyển `status = 'OFFLINE'`.
   * **File bàn giao:** `services/heartbeat_daemon.js`.

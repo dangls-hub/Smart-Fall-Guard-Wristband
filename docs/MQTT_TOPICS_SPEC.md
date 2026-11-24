@@ -1,6 +1,6 @@
 # Hợp đồng MQTT mục tiêu
 
-SP1-BE-01 đã triển khai transport backend: subscribe `fallguard/v1/devices/+/+`, log topic/JSON và bỏ qua JSON lỗi. Chưa có ingest theo schema, đối chiếu device_id, lưu CSDL, chống trùng, ACK nghiệp vụ hoặc firmware tương ứng. Các hành vi nghiệp vụ dưới đây vẫn là kế hoạch.
+Backend subscribe `fallguard/v1/devices/+/+`, log topic/JSON và bỏ qua JSON lỗi. SP2-INF-02 ghi heartbeat ONLINE vào PostgreSQL khi bật `HEARTBEAT_ENABLED=true`. Các luồng lưu telemetry và sự kiện, chống trùng, ACK nghiệp vụ và firmware tương ứng vẫn là kế hoạch.
 
 Prefix: fallguard/v1/devices/{device_id}. Username mỗi thiết bị bằng device_id; backend dùng fallguard_backend. ID chỉ dùng chữ, số, dấu gạch dưới/gạch ngang; không chứa /, +, #. Server phải đối chiếu ID trong payload với ID trong topic.
 
@@ -10,7 +10,7 @@ Prefix: fallguard/v1/devices/{device_id}. Username mỗi thiết bị bằng dev
 | alert | Thiết bị → backend | 1 | Không | Sự kiện ngã mới xác nhận |
 | sync | Thiết bị → backend | 1 | Không | Gửi lại từng sự kiện trong queue |
 | event_ack | Backend → thiết bị | 1 | Không | Xác nhận lưu bền vững theo event_id |
-| status | Thiết bị/LWT → backend | 1 | Có | ONLINE/OFFLINE; heartbeat dự kiến 5 giây |
+| status | Thiết bị/LWT → backend | 1 | Có | ONLINE/OFFLINE. Thiết bị gửi heartbeat ONLINE mỗi 5 giây |
 | commands | Backend → thiết bị | 1 | Không | command_id, action, params, thời hạn |
 | command_ack | Thiết bị → backend | 1 | Không | command_id, trạng thái áp dụng/lỗi |
 
@@ -38,7 +38,9 @@ Queue lưu cả sự kiện online trước lần gửi đầu tiên, có giới
 
 Lệnh có action thuộc CANCEL_ALARM, FIND_DEVICE, CONFIG_THRESHOLD. Bắt buộc kiểm tra kiểu/khoảng params, command_id, thời hạn; từ chối retained command. Lệnh trùng không áp dụng lặp tác dụng phụ. CANCEL_ALARM tắt còi, không tự resolve sự kiện.
 
-LWT OFFLINE đăng ký tại connect; ONLINE retained gửi sau kết nối. Backend xử lý retained status cũ theo thời gian heartbeat, không coi đó là bằng chứng thiết bị đang online. LWT phụ thuộc keepalive; đo riêng timeout heartbeat.
+Heartbeat sử dụng `{"device_id":"esp32_001","status":"ONLINE"}`. Backend đối chiếu ID trong payload với ID trên topic, bỏ qua bản tin phát lại với cờ retained và lưu thời gian backend nhận bản tin mới vào `last_seen`. Bản tin ONLINE được broker chuyển trực tiếp tới subscriber hiện tại vẫn là heartbeat hợp lệ. Backend quét mỗi 5 giây và đánh dấu OFFLINE khi đã qua ít nhất 15 giây kể từ heartbeat cuối.
+
+LWT OFFLINE thuộc Spiral 3. Khi triển khai, đo thời gian phát hiện của LWT riêng vì nó phụ thuộc MQTT keepalive.
 
 Phải chọn MQTT client firmware hỗ trợ publish QoS 1 và TLS. Xác nhận khả năng thư viện trước khi khóa dependencies; không suy ra QoS publish từ QoS subscribe. Với ESP-MQTT, cân nhắc enqueue để không chặn vòng cảm biến, và vẫn cần queue bền vững qua reboot.
 

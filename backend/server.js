@@ -1,10 +1,12 @@
 // [SP1-BE-01 & SP2-BE-01] Phụ trách: Nguyễn Hữu Chính
-// Express + MQTT transport; CSDL, Socket.io và API nghiệp vụ chưa triển khai.
+// Express + MQTT transport and optional device heartbeat.
 const path = require('node:path');
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 const express = require('express');
 const cors = require('cors');
 const { createMqttService } = require('./services/mqttService');
+const { createDatabase } = require('../database/db_helper');
+const { createHeartbeat } = require('../services/heartbeat_daemon');
 
 function startServer({ env = process.env, logger = console, shutdownTimeoutMs = 5000 } = {}) {
     const app = express();
@@ -14,15 +16,29 @@ function startServer({ env = process.env, logger = console, shutdownTimeoutMs = 
     app.use(express.json());
     app.use('/api', require('./routes/api'));
 
-    const mqttService = createMqttService({ env, logger });
-    mqttService.start();
+    const db = env.HEARTBEAT_ENABLED === 'true' ? createDatabase(env, logger, {
+        connectionTimeoutMillis: 1500,
+        statementTimeoutMillis: 2000,
+        queryTimeoutMillis: 3000,
+    }) : undefined;
+    const heartbeat = db && createHeartbeat({ db, logger });
+    const mqttService = createMqttService({ env, logger, onMessage: heartbeat?.onMessage });
+
+    async function stopHeartbeat() {
+        await heartbeat?.stop();
+        await db?.close();
+    }
+
     let server;
     try {
+        mqttService.start();
         server = app.listen(PORT, HOST, () => {
+            heartbeat?.start();
             logger.info(`Smart Fall-Guard backend running at http://${HOST}:${server.address().port}`);
         });
     } catch (error) {
         void mqttService.stop().catch(() => {});
+        void stopHeartbeat().catch(() => {});
         throw error;
     }
     const sockets = new Set();
@@ -45,6 +61,7 @@ function startServer({ env = process.env, logger = console, shutdownTimeoutMs = 
                             else resolve();
                         })),
                         mqttService.stop(),
+                        stopHeartbeat(),
                     ]),
                     new Promise((_, reject) => {
                         timer = setTimeout(() => {
@@ -82,7 +99,7 @@ if (require.main === module) {
     try {
         startServer();
     } catch (error) {
-        console.error(error.message.startsWith('[MQTT]') ? error.message : '[App] Startup failed');
+        console.error(/^\[(MQTT|DB)\]/.test(error.message) ? error.message : '[App] Startup failed');
         process.exitCode = 1;
     }
 }
