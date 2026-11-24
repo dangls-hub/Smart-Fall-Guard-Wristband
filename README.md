@@ -2,7 +2,7 @@
 
 Dự án Bài tập lớn IoT — Nhóm 4, GEHIHI. Kế hoạch triển khai: 01/11–30/11/2026.
 
-> **Trạng thái: chưa có bản chạy đầu-cuối.** SP1-BE-01 đã có Express + MQTT transport: kết nối/reconnect, subscribe và log JSON, dừng có thời hạn. Đã kiểm chứng MQTT local với Mosquitto thật; TLS chưa thử handshake thật. SP1-INF-02 đã có PostgreSQL helper và kiểm chứng kết nối/schema local; chưa tích hợp lưu MQTT vào CSDL. Firmware chưa đọc cảm biến/chạy FSM; Socket.io, webhook và dashboard còn là khung. Các tính năng dưới đây là thiết kế mục tiêu. Chưa có kết quả đo độ chính xác, độ trễ hoặc thời lượng pin.
+> **Tiến độ 24/11/2026: chưa có bản chạy đầu-cuối.** Express đã nhận JSON từ Mosquitto thật và PostgreSQL helper đã được kiểm thử local. Spiral 2 bổ sung quy trình thiết lập MQTT qua TLS và heartbeat thiết bị lưu vào PostgreSQL. Firmware chính, luồng lưu sự kiện ngã, Socket.io và webhook vẫn chưa có triển khai. Dashboard hiện là giao diện tĩnh. Chưa đo độ chính xác, độ trễ đầu-cuối hoặc thời lượng pin. Xem [báo cáo hạ tầng](docs/INFRA_TEST_REPORT.md) để biết phạm vi kiểm chứng.
 
 ## 1. Kiến trúc mục tiêu
 
@@ -18,7 +18,7 @@ flowchart LR
 ```
 
 - ESP8266 tiếp tục phát hiện và báo tại chỗ khi mạng mất; reconnect phải không chặn vòng lấy mẫu 20 ms.
-- PostgreSQL là CSDL duy nhất của bản đầu. Heartbeat chạy trong tiến trình backend khi được triển khai; chưa cần một daemon độc lập.
+- PostgreSQL là CSDL duy nhất của bản đầu. Heartbeat chạy trong tiến trình backend khi bật `HEARTBEAT_ENABLED=true`.
 - MQTT có tài khoản riêng theo device_id; frontend dùng REST/Socket.io qua backend, không kết nối broker trực tiếp.
 - Chỉ xóa sự kiện offline sau ACK của backend xác nhận đã commit CSDL. QoS 1 có thể phát trùng; cần chống trùng theo event_id.
 - Mất Wi-Fi/broker: cảnh báo từ xa bị trì hoãn đến khi nối lại; buffer chỉ bảo toàn lịch sử trong giới hạn dung lượng và nguồn điện.
@@ -124,13 +124,15 @@ Pop-Location
 
 Backend subscribe `fallguard/v1/devices/+/+` và log topic cùng JSON đã parse; JSON lỗi được bỏ qua. Broker tạm ngừng không làm HTTP ngừng phục vụ. Backend yêu cầu đủ MQTT_HOST/PORT/PROTOCOL/USERNAME/PASSWORD; cấu hình sai báo lỗi trước khi mở HTTP. Với `mqtts`, MQTT_CA_PATH bắt buộc, đường dẫn tương đối tính từ gốc repo và chứng chỉ vẫn được xác minh. Ctrl+C/SIGTERM đóng HTTP và MQTT, tối đa 5 giây rồi buộc thoát nếu bị kẹt.
 
-Chạy `npm test` trong `backend` với Node.js 22. Xem [kiểm chứng SP1-BE-01 và cách publish mẫu](docs/VALIDATION.md#sp1-be-01--28102026). API nghiệp vụ và luồng lưu dữ liệu/ACK/cảnh báo chưa được triển khai. Trang React và sketch hiện tại cũng chưa tạo chức năng phát hiện ngã.
+Với `.env` đã có, thêm `HEARTBEAT_ENABLED=true` để ghi heartbeat vào PostgreSQL. Thiết bị gửi trạng thái ONLINE mỗi 5 giây lên topic `fallguard/v1/devices/{device_id}/status`. Backend ghi `last_seen` theo thời gian nhận và quét thiết bị quá hạn mỗi 5 giây. Ngưỡng không hoạt động 15 giây cộng thêm tối đa một chu kỳ quét trong điều kiện bình thường.
+
+Chạy `npm test` trong `backend` với Node.js 22. Xem [kiểm chứng SP1-BE-01 và cách publish mẫu](docs/VALIDATION.md#sp1-be-01--28102026). API nghiệp vụ và luồng lưu sự kiện ngã, ACK và cảnh báo chưa được triển khai. Trang React và sketch hiện tại cũng chưa tạo chức năng phát hiện ngã.
 
 SP1-BE-02 có hai khung route `GET /api/devices` và `GET /api/events`: trả HTTP **501** với JSON `error.code = NOT_IMPLEMENTED`, không truy vấn CSDL hoặc trả dữ liệu giả. Query/filter chưa hỗ trợ; đường dẫn chưa khai báo vẫn trả 404. Xem [hợp đồng API và ví dụ gọi](docs/API_DOCUMENTATION.md) và [kiểm chứng BE-02](docs/VALIDATION.md#sp1-be-02--30102026). Việc có khung route chưa phải hoàn thành nghiệp vụ API hoặc toàn bộ Spiral 1.
 
 Đã có bài nghiệm thu riêng `npm run test:mosquitto` dùng broker thật, không mock. Bài này **dừng/khởi động lại service Mosquitto local**; chỉ chạy với broker thử nghiệm ở `127.0.0.1`, đủ hai tài khoản thiết bị thật theo `.env.example`. Xem [kết quả và cách chạy nghiệm thu MQTT local](docs/VALIDATION.md#nghiệm-thu-mosquitto-thật-local--28102026).
 
-Khi gắn ESP8266 qua LAN, dùng [hướng dẫn TLS](docs/DEPLOYMENT.md) và Compose override; chưa mở API ra ngoài cho đến khi có xác thực/phân quyền. Chứng chỉ có sẵn trong repo là placeholder. Tài khoản MQTT `esp32_001`/`esp32_002` và tên nhánh `feat/firmware-esp32` là tên đã có, không cần đổi chỉ vì thay bo.
+Khi gắn ESP8266 qua LAN, tạo chứng chỉ cho máy chủ và dùng Compose override theo [hướng dẫn TLS](docs/DEPLOYMENT.md). Giữ API ở loopback cho đến khi có xác thực và phân quyền. Tài khoản MQTT `esp32_001`/`esp32_002` và nhánh `feat/firmware-esp32` giữ tên hiện có.
 
 ## 6. Phân công và kế hoạch
 

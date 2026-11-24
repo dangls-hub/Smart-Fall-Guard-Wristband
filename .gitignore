@@ -15,6 +15,7 @@ build/
 *.hex
 
 # Private keys
+certs/local/
 certs/*.key
 certs/*.csr
 certs/*.srl

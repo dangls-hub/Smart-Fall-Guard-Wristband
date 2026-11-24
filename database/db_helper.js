@@ -6,7 +6,11 @@ const { createRequire } = require('node:module');
 const backendRequire = createRequire(path.resolve(__dirname, '../backend/package.json'));
 const { Pool } = backendRequire('pg');
 
-function createDatabase(env = process.env, logger = console) {
+function createDatabase(env = process.env, logger = console, {
+    connectionTimeoutMillis = 5000,
+    statementTimeoutMillis,
+    queryTimeoutMillis,
+} = {}) {
     for (const key of ['DB_HOST', 'DB_PORT', 'POSTGRES_DB', 'POSTGRES_USER', 'POSTGRES_PASSWORD']) {
         if (typeof env[key] !== 'string' || !env[key].trim()) {
             throw new Error(`[DB] Missing required configuration: ${key}`);
@@ -21,7 +25,9 @@ function createDatabase(env = process.env, logger = console) {
         database: env.POSTGRES_DB,
         user: env.POSTGRES_USER,
         password: env.POSTGRES_PASSWORD,
-        connectionTimeoutMillis: 5000,
+        connectionTimeoutMillis,
+        statement_timeout: statementTimeoutMillis,
+        query_timeout: queryTimeoutMillis,
         idleTimeoutMillis: 10000,
         max: 10,
     });

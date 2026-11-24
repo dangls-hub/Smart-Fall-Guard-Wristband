@@ -60,7 +60,7 @@ function errorCode(error) {
 }
 
 function createMqttService({ env = process.env, connect = mqtt.connect, logger = console,
-    stopTimeoutMs = 2000 } = {}) {
+    stopTimeoutMs = 2000, onMessage } = {}) {
     let client;
     let stopping = false;
     let stopPromise;
@@ -89,7 +89,7 @@ function createMqttService({ env = process.env, connect = mqtt.connect, logger =
                 logger.info(`[MQTT] Subscribed ${DEVICE_TOPIC} (QoS ${grant.qos})`);
             });
         });
-        client.on('message', (topic, payload) => {
+        client.on('message', (topic, payload, packet) => {
             if (stopping) return;
             let data;
             try {
@@ -99,6 +99,7 @@ function createMqttService({ env = process.env, connect = mqtt.connect, logger =
                 return;
             }
             logger.info(`[MQTT] Message ${topic}`, data);
+            onMessage?.(topic, data, packet);
         });
         client.on('reconnect', () => logger.info('[MQTT] Reconnecting'));
         client.on('offline', () => logger.warn('[MQTT] Offline; HTTP remains available'));
